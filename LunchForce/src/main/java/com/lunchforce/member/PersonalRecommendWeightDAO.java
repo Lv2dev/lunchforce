@@ -6,17 +6,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.lunchforce.dbconnect.DBConnecter;
+import com.lunchforce.dbconnect.JDBConnect;
+import com.lunchforce.store.MenuElementDTO;
+
 import java.sql.ResultSet;
 
-public class PersonalRecommendWeightDAO {
+public class PersonalRecommendWeightDAO extends JDBConnect{
 	private static PersonalRecommendWeightDAO personalRecommendWeightDAO = new PersonalRecommendWeightDAO();
-	private DBConnecter dbConn = DBConnecter.getDBConnecter();
-
-	private Connection conn;
-	private Statement stmt;
-	private ResultSet rs;
-	private PreparedStatement pstmt;
-	private StringBuffer query;
 	
 	//생성자
 	private PersonalRecommendWeightDAO() {}
@@ -132,21 +128,56 @@ public class PersonalRecommendWeightDAO {
 		}
 	}
 	
-	// pstmt일 경우 연결 해제
-	public void disconnectPstmt() throws SQLException {
-		if (rs != null) {
-			rs.close();
-		}
-		pstmt.close();
-		conn.close();
-	}
+	//개인화 가중치 가져오기
+	public synchronized PersonalRecommendWeightDTO delPRW(String userId) throws SQLException {
+		try {
+			conn = dbConn.getConn();
+			stmt = conn.createStatement();
+			query = new StringBuffer();
 
-	// stmt일 경우 연결 해제
-	public void disconnectStmt() throws SQLException {
-		if (rs != null) {
-			rs.close();
+			query.append("SELECT id, user_id, allergy, recommend_keyword, feeling, ");
+			query.append("condition, health, favor, weather, temperature, dust, humidity, order_list");
+			query.append("calorie, nutrition, category, score, distance, random FROM personal_remommend_weight ");
+			query.append("WHERE user_id = '" + userId + "'");
+
+			rs = stmt.executeQuery(query.toString());
+			
+			PersonalRecommendWeightDTO personalRecommendWeightDTO = new PersonalRecommendWeightDTO();
+			
+			int cnt = 0;
+			while (rs.next()) {
+				personalRecommendWeightDTO.setId(rs.getInt("id"));
+				personalRecommendWeightDTO.setUserId(rs.getString("user_id"));
+				personalRecommendWeightDTO.setAllergy(rs.getInt("allergy"));
+				personalRecommendWeightDTO.setRecommend_keyword(rs.getInt("recommend_keyword"));
+				personalRecommendWeightDTO.setFeeling(rs.getInt("feeling"));
+				personalRecommendWeightDTO.setCondition(rs.getInt("condition"));
+				personalRecommendWeightDTO.setHealth(rs.getInt("health"));
+				personalRecommendWeightDTO.setFavor(rs.getInt("favor"));
+				personalRecommendWeightDTO.setWeather(rs.getInt("weather"));
+				personalRecommendWeightDTO.setTemperature(rs.getInt("temperature"));
+				personalRecommendWeightDTO.setDust(rs.getInt("dust"));
+				personalRecommendWeightDTO.setHumidity(rs.getInt("humidity"));
+				personalRecommendWeightDTO.setOrderList(rs.getInt("order_list"));
+				personalRecommendWeightDTO.setCalorie(rs.getInt("calorie"));
+				personalRecommendWeightDTO.setNutrition(rs.getInt("nutrition"));
+				personalRecommendWeightDTO.setCategory(rs.getInt("category"));
+				personalRecommendWeightDTO.setScore(rs.getInt("score"));
+				personalRecommendWeightDTO.setDistance(rs.getInt("distance"));
+				personalRecommendWeightDTO.setRandom(rs.getInt("random"));
+				cnt++;
+			}
+
+			if (cnt < 1) {
+				return null;
+			}
+			
+			return personalRecommendWeightDTO;
+		} catch (Exception e) {
+			System.out.println("personalRecommendWeightDTO 가져오기 오류");
+			return null;
+		} finally {
+			disconnectStmt();
 		}
-		stmt.close();
-		conn.close();
 	}
 }

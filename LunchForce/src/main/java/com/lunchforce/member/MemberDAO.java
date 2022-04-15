@@ -6,18 +6,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.lunchforce.dbconnect.DBConnecter;
+import com.lunchforce.dbconnect.JDBConnect;
+
 import java.sql.ResultSet;
 
 //DB를 사용해 멤버정보 관리 기능을구현한 클래스
-public class MemberDAO{
+public class MemberDAO extends JDBConnect{
 	private static MemberDAO memberDAO = new MemberDAO();
-	private DBConnecter dbConn = DBConnecter.getDBConnecter();
-
-	private Connection conn;
-	private Statement stmt;
-	private ResultSet rs;
-	private PreparedStatement pstmt;
-	private StringBuffer query;
 
 	// 생성자
 	private MemberDAO() {
@@ -271,10 +266,11 @@ public class MemberDAO{
 			query.append("UPDATE user ");
 			query.append("SET name = " + "'" + memberDTO2.getName() + "', " );
 			query.append(" nickname = " + "'" + memberDTO2.getNickname() + "', " );
-			query.append(" tel = " + "'" + memberDTO2.getTel() + "', " );
+			query.append(" tel = " + "" + memberDTO2.getTel() + ", " );
 			query.append(" email = " + "'" + memberDTO2.getEmail() + "', " );
-			query.append(" bday = " + "'" + memberDTO2.getQuestion() + "' " );
-			query.append("WHERE id = " + "'" + memberDTO2.getAnswer() + "'");
+			query.append(" question = " + "'" + memberDTO2.getQuestion() + "' " );
+			query.append(" answer = " + "'" + memberDTO2.getAnswer() + "' " );
+			query.append("WHERE id = " + "'" + memberDTO2.getId() + "'");
 			
 			pstmt = conn.prepareStatement(query.toString());
 			
@@ -311,24 +307,5 @@ public class MemberDAO{
 		} finally {
 			disconnectPstmt();
 		}
-	}
-	
-
-	// pstmt일 경우 연결 해제
-	public void disconnectPstmt() throws SQLException {
-		if (rs != null) {
-			rs.close();
-		}
-		pstmt.close();
-		conn.close();
-	}
-
-	// stmt일 경우 연결 해제
-	public void disconnectStmt() throws SQLException {
-		if (rs != null) {
-			rs.close();
-		}
-		stmt.close();
-		conn.close();
 	}
 }

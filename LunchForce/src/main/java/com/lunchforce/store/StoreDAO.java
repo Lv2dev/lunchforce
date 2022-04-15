@@ -8,16 +8,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.lunchforce.dbconnect.DBConnecter;
+import com.lunchforce.dbconnect.JDBConnect;
 
-public class StoreDAO {
+public class StoreDAO extends JDBConnect{
 	private static StoreDAO storeDAO = new StoreDAO();
-	private DBConnecter dbConn = DBConnecter.getDBConnecter();
-
-	private Connection conn;
-	private Statement stmt;
-	private ResultSet rs;
-	private PreparedStatement pstmt;
-	private StringBuffer query;
 
 	// 생성자
 	private StoreDAO() {
@@ -174,21 +168,4 @@ public class StoreDAO {
 
 	// 가계통계 - 지정한 기간동안의 주문 수
 
-	// pstmt일 경우 연결 해제
-	public void disconnectPstmt() throws SQLException {
-		if (rs != null) {
-			rs.close();
-		}
-		pstmt.close();
-		conn.close();
-	}
-
-	// stmt일 경우 연결 해제
-	public void disconnectStmt() throws SQLException {
-		if (rs != null) {
-			rs.close();
-		}
-		stmt.close();
-		conn.close();
-	}
 }

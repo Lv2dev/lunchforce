@@ -1,6 +1,7 @@
 package com.lunchforce.store;
 
 public class MenuElementDTO {
+	private int id;
 	private int allergy;
 	private int feeling;
 	private int condition; //몸상태
@@ -12,9 +13,22 @@ public class MenuElementDTO {
 	private int calorie; //칼로리
 	private int health; //건강
 	private int category; //카테고리
+	private int nutrition;
 	
 	//getters and setters
 	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public int getNutrition() {
+		return nutrition;
+	}
+	public void setNutrition(int nurition) {
+		this.nutrition = nurition;
+	}
 	public int getAllergy() {
 		return allergy;
 	}

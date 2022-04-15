@@ -9,16 +9,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import com.lunchforce.dbconnect.DBConnecter;
+import com.lunchforce.dbconnect.JDBConnect;
 
-public class MenuDAO {
+public class MenuDAO extends JDBConnect{
 	private static MenuDAO menuDAO = new MenuDAO();
-	private DBConnecter dbConn = DBConnecter.getDBConnecter();
-
-	private Connection conn;
-	private Statement stmt;
-	private ResultSet rs;
-	private PreparedStatement pstmt;
-	private StringBuffer query;
 
 	// 생성자
 	private MenuDAO() {
@@ -34,7 +28,6 @@ public class MenuDAO {
 
 			pstmt = conn.prepareStatement(query.toString());
 
-			pstmt.setInt(1, menuDTO.getMenuId());
 			pstmt.setInt(2, menuDTO.getStoreId());
 			pstmt.setString(3, menuDTO.getMenuName());
 			pstmt.setInt(4, menuDTO.getPrice());
@@ -162,23 +155,5 @@ public class MenuDAO {
 			menuDAO = new MenuDAO();
 		}
 		return menuDAO;
-	}
-
-	// pstmt일 경우 연결 해제
-	public void disconnectPstmt() throws SQLException {
-		if (rs != null) {
-			rs.close();
-		}
-		pstmt.close();
-		conn.close();
-	}
-
-	// stmt일 경우 연결 해제
-	public void disconnectStmt() throws SQLException {
-		if (rs != null) {
-			rs.close();
-		}
-		stmt.close();
-		conn.close();
 	}
 }
