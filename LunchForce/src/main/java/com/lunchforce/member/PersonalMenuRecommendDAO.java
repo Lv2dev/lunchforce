@@ -115,7 +115,7 @@ public class PersonalMenuRecommendDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
-			System.out.println("MemberDAO_editMemberInfo()_ERROR");
+			e.printStackTrace();
 			return false;
 		} finally {
 			disconnectPstmt();

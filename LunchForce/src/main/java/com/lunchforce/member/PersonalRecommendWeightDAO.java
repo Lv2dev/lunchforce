@@ -61,7 +61,7 @@ public class PersonalRecommendWeightDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 			disconnectPstmt();
 			return false;
 		}
@@ -99,6 +99,7 @@ public class PersonalRecommendWeightDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		} finally {
 			disconnectPstmt();
@@ -121,7 +122,7 @@ public class PersonalRecommendWeightDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
-			System.out.println("멤버 가중치 삭제 에러");
+			e.printStackTrace();
 			return false;
 		} finally {
 			disconnectPstmt();
@@ -174,7 +175,7 @@ public class PersonalRecommendWeightDAO extends JDBConnect{
 			
 			return personalRecommendWeightDTO;
 		} catch (Exception e) {
-			System.out.println("personalRecommendWeightDTO 가져오기 오류");
+			e.printStackTrace();
 			return null;
 		} finally {
 			disconnectStmt();

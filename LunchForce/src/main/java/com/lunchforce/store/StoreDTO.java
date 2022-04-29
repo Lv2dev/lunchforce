@@ -9,7 +9,7 @@ public class StoreDTO {
 	private String userId;
 	private String category;
 	private String notice;
-	private int tel;
+	private String tel;
 	private String thumb;
 	private int openTime;
 	private int closeTime;
@@ -19,11 +19,20 @@ public class StoreDTO {
 	private int braketimeStart;
 	private int braketimeEnd;
 	private Timestamp joinDay;
+	private String storeName;
+	private int status;
 	
-	
+
 	//getters and setters
+	
 	public int getStoreId() {
 		return storeId;
+	}
+	public int getStatus() {
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
 	}
 	public void setStoreId(int storeId) {
 		this.storeId = storeId;
@@ -46,10 +55,10 @@ public class StoreDTO {
 	public void setNotice(String notice) {
 		this.notice = notice;
 	}
-	public int getTel() {
+	public String getTel() {
 		return tel;
 	}
-	public void setTel(int tel) {
+	public void setTel(String tel) {
 		this.tel = tel;
 	}
 	public String getThumb() {
@@ -94,6 +103,11 @@ public class StoreDTO {
 	public void setJoinDay(Timestamp joinDay) {
 		this.joinDay = joinDay;
 	}
-	
+	public String getStoreName() {
+		return storeName;
+	}
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
+	}
 	
 }

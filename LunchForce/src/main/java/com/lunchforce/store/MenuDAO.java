@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import com.lunchforce.dbconnect.DBConnecter;
 import com.lunchforce.dbconnect.JDBConnect;
+import java.util.LinkedHashMap;
 
 public class MenuDAO extends JDBConnect{
 	private static MenuDAO menuDAO = new MenuDAO();
@@ -50,7 +51,7 @@ public class MenuDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 			System.out.println("memberDAO_memberJoin()_ERROR");
 			return false;
 		} finally {
@@ -89,6 +90,7 @@ public class MenuDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MenuDAO_editMenu_ERROR");
 			return false;
 		} finally {
@@ -112,6 +114,7 @@ public class MenuDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MenuDAO_메뉴삭제_ERROR");
 			return false;
 		} finally {
@@ -119,35 +122,82 @@ public class MenuDAO extends JDBConnect{
 		}
 	}
 
-	// 메뉴들 ArrayList로 가져오기
-	public synchronized ArrayList<MenuDTO> getAllMenu(int storeId) throws SQLException {
-		ArrayList<MenuDTO> arr = new ArrayList<MenuDTO>();
+	// 메뉴들 LinkedHashMap로 가져오기
+	public synchronized LinkedHashMap<Integer, String> getAllMenu(int storeId) throws SQLException {
+		LinkedHashMap<Integer, String> hash = new LinkedHashMap<Integer, String>();
 		try {
 			conn = dbConn.getConn();
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 
-			query.append("SELECT menu_id, menu_name FROM menu");
-			query.append("WHERE store_id = '" + storeId + "' ORDER BY menu_id");
+			query.append("SELECT menu_id, menu_name FROM menu ");
+			query.append("WHERE store_id = " + storeId + " ORDER BY menu_id");
 
 			rs = stmt.executeQuery(query.toString());
-			int cnt = 0;
 			while (rs.next()) {
-				MenuDTO menuDTO = new MenuDTO();
-				menuDTO.setMenuId(rs.getInt("menu_id"));
-				menuDTO.setMenuName(rs.getString("menu_name"));
-				arr.add(menuDTO);
-				cnt++;
+				hash.put(rs.getInt("menu_id"), rs.getString("menu_name"));
 			}
-
-			return arr;
+			return hash;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MenuDAO_메뉴목록 가져오기 에러");
 			return null;
 		} finally {
 			disconnectStmt();
 		}
 	}
+	
+	
+	//가게아이디와 메뉴아이디 넣으면 메뉴정보 가져오기
+	public synchronized MenuDTO getStoreInfo(int storeId, int menuId) throws SQLException {
+		try {
+			conn = dbConn.getConn();
+			stmt = conn.createStatement();
+			query = new StringBuffer();
+
+			query.append("SELECT * FROM menu ");
+			query.append("WHERE menu_id = " + menuId + " and store_id = " + storeId);
+
+			rs = stmt.executeQuery(query.toString());
+
+			MenuDTO menuDTO = new MenuDTO();
+
+			int cnt = 0;
+			while (rs.next()) {
+				menuDTO.setStoreId(storeId);
+				menuDTO.setMenuId(menuId);
+				menuDTO.setMenuName(rs.getString("menu_name"));
+				menuDTO.setPrice(rs.getInt("price"));
+				menuDTO.setNotice(rs.getString("notice"));
+				menuDTO.setPic(rs.getString("pic"));
+				menuDTO.setAllergy(rs.getInt("allergy"));
+				menuDTO.setFeeling(rs.getInt("feeling"));
+				menuDTO.setCondition(rs.getInt("condition"));
+				menuDTO.setWeather(rs.getInt("weather"));
+				menuDTO.setTemperature(rs.getInt("temperature"));
+				menuDTO.setDust(rs.getInt("dust"));
+				menuDTO.setHumidity(rs.getInt("humidity"));
+				menuDTO.setFavor(rs.getInt("favor"));
+				menuDTO.setCalorie(rs.getInt("calorie"));
+				menuDTO.setHealth(rs.getInt("health"));
+				menuDTO.setCategory(rs.getInt("category"));
+				cnt++;
+			}
+
+			if (cnt < 1) {
+				return null;
+			}
+
+			return menuDTO;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MenuDTO_메뉴정보가져오기_ERROR");
+			return null;
+		} finally {
+			disconnectStmt();
+		}
+	}
+	
 
 	// 인스턴스 getter
 	public static MenuDAO getInstance() {

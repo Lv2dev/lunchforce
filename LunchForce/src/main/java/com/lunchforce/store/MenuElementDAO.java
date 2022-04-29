@@ -54,6 +54,7 @@ public class MenuElementDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			// TODO: handle exception
 			disconnectPstmt();
 			return false;
@@ -87,6 +88,7 @@ public class MenuElementDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		} finally {
 			disconnectPstmt();
@@ -109,6 +111,7 @@ public class MenuElementDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("ElementDAO_Element삭제_ERROR");
 			return false;
 		} finally {
@@ -154,6 +157,7 @@ public class MenuElementDAO extends JDBConnect{
 			
 			return menuelementDTO;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MemberDAO_getMemberInfo_ERROR");
 			return null;
 		} finally {

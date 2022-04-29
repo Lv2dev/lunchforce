@@ -38,7 +38,7 @@ public class MemberDAO extends JDBConnect{
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 
-			query.append("SELECT id FROM USER");
+			query.append("SELECT id FROM USER ");
 			query.append("WHERE id = '" + memberDTO.getId() + "'");
 
 			rs = stmt.executeQuery(query.toString());
@@ -54,6 +54,7 @@ public class MemberDAO extends JDBConnect{
 
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("memberDAO_idcheck_error");
 			return false;
 		} finally {
@@ -87,7 +88,7 @@ public class MemberDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 			System.out.println("memberDAO_memberJoin()_ERROR");
 			return false;
 		} finally {
@@ -115,6 +116,7 @@ public class MemberDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MemberDAO_replacePw()_ERROR");
 			return false;
 		} finally {
@@ -123,14 +125,14 @@ public class MemberDAO extends JDBConnect{
 	}
 
 	// 로그인
-	public synchronized boolean memberLogin(MemberDTO memberDTO) throws SQLException {
+	public synchronized boolean memberLogin(String id, String pw) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 
-			query.append("SELECT id, pw FROM USER");
-			query.append("WHERE id = '" + memberDTO.getId() + "' AND pw = '" + memberDTO.getPw() + "'");
+			query.append("SELECT id, pw FROM USER ");
+			query.append("WHERE id = '" + id + "' AND pw = '" + pw + "'");
 
 			rs = stmt.executeQuery(query.toString());
 			int cnt = 0;
@@ -143,6 +145,7 @@ public class MemberDAO extends JDBConnect{
 			}
 			return false;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MemberLoginDAO_Login_ERROR");
 			return false;
 		} finally {
@@ -151,14 +154,14 @@ public class MemberDAO extends JDBConnect{
 	}
 	
 	//비밀번호 찾기 전 질문 가져오기
-	public synchronized String getQuestion(MemberDTO memberDTO) throws SQLException {
+	public synchronized String getQuestion(String id) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 
-			query.append("SELECT id, question, answer FROM USER");
-			query.append("WHERE id = '" + memberDTO.getId() + "'");
+			query.append("SELECT id, question, answer FROM USER ");
+			query.append("WHERE id = '" + id + "'");
 
 			rs = stmt.executeQuery(query.toString());
 			int cnt = 0;
@@ -174,6 +177,7 @@ public class MemberDAO extends JDBConnect{
 			
 			return question;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MemberLoginDAO_getQuestion_ERROR");
 			return null;
 		} finally {
@@ -182,20 +186,20 @@ public class MemberDAO extends JDBConnect{
 	}
 	
 	//질문 가져온 후 비밀번호 가져오기
-	public synchronized String getPassword(MemberDTO memberDTO) throws SQLException {
+	public synchronized String getPassword(String id, String answer) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 
-			query.append("SELECT password, answer FROM USER");
-			query.append("WHERE id = '" + memberDTO.getId() + "'");
+			query.append("SELECT pw FROM user ");
+			query.append("WHERE id = '" + id + "'" + " AND answer = '" + answer + "'");
 
 			rs = stmt.executeQuery(query.toString());
 			int cnt = 0;
 			String password = "";
 			while (rs.next()) {
-				password = rs.getString("question");
+				password = rs.getString("pw");
 				cnt++;
 			}
 
@@ -205,6 +209,7 @@ public class MemberDAO extends JDBConnect{
 			
 			return password;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MemberLoginDAO_getPW_ERROR");
 			return null;
 		} finally {
@@ -219,7 +224,7 @@ public class MemberDAO extends JDBConnect{
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 
-			query.append("SELECT pw, name, nickname, tel, email, bday, jday, type, gender, question, answer FROM USER");
+			query.append("SELECT pw, name, nickname, tel, email, bday, jday, type, gender, question, answer FROM USER ");
 			query.append("WHERE id = '" + id + "'");
 
 			rs = stmt.executeQuery(query.toString());
@@ -249,6 +254,7 @@ public class MemberDAO extends JDBConnect{
 			
 			return memberDTO;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MemberDAO_getMemberInfo_ERROR");
 			return null;
 		} finally {
@@ -266,7 +272,7 @@ public class MemberDAO extends JDBConnect{
 			query.append("UPDATE user ");
 			query.append("SET name = " + "'" + memberDTO2.getName() + "', " );
 			query.append(" nickname = " + "'" + memberDTO2.getNickname() + "', " );
-			query.append(" tel = " + "" + memberDTO2.getTel() + ", " );
+			query.append(" tel = " + "'" + memberDTO2.getTel() + "', " );
 			query.append(" email = " + "'" + memberDTO2.getEmail() + "', " );
 			query.append(" question = " + "'" + memberDTO2.getQuestion() + "' " );
 			query.append(" answer = " + "'" + memberDTO2.getAnswer() + "' " );
@@ -279,6 +285,7 @@ public class MemberDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MemberDAO_editMemberInfo()_ERROR");
 			return false;
 		} finally {
@@ -302,6 +309,7 @@ public class MemberDAO extends JDBConnect{
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("MemberDAO_editMemberInfo()_ERROR");
 			return false;
 		} finally {

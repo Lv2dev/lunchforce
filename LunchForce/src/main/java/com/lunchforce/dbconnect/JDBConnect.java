@@ -24,7 +24,6 @@ public class JDBConnect {
 			rs.close();
 		}
 		pstmt.close();
-		conn.close();
 	}
 
 	// stmt일 경우 연결 해제
@@ -33,6 +32,5 @@ public class JDBConnect {
 			rs.close();
 		}
 		stmt.close();
-		conn.close();
 	}
 }
