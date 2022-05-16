@@ -2,21 +2,16 @@
     pageEncoding="UTF-8"%>
 <%@page import="com.lunchforce.member.*"%>
 <%@page import="com.lunchforce.store.*"%>
-<%@page import="java.sql.Date"%>
-<%request.setCharacterEncoding("UTF-8");%>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>가게추가처리</title>
 <%request.setCharacterEncoding("UTF-8");%>
 <%
 
 	MemberDTO memDTO = (MemberDTO)session.getAttribute("memberDTO");
 	MemberDAO memDAO = MemberDAO.getInstance();
 	StoreDAO storeDAO = StoreDAO.getInstance();
+	StoreDTO sdto = (StoreDTO)session.getAttribute("storeDTO"); //기존 세션 정보
 	StoreDTO storeDTO = new StoreDTO();
 	
+	storeDTO.setStoreId(sdto.getStoreId());
 	storeDTO.setStoreName(request.getParameter("storeName"));
 	storeDTO.setCategory(request.getParameter("category"));
 	storeDTO.setNotice(request.getParameter("notice"));
@@ -25,16 +20,16 @@
 	storeDTO.setCloseTime(Integer.parseInt(request.getParameter("closeTime")));
 	storeDTO.setBraketimeStart(Integer.parseInt(request.getParameter("brakeTimeStart")));
 	storeDTO.setBraketimeEnd(Integer.parseInt(request.getParameter("brakeTimeEnd")));
-	storeDTO.setStatus(0);
+	storeDTO.setStatus(sdto.getStatus());
 	
 	storeDTO.setUserId(memDTO.getId());
 	
-	if(true == storeDAO.joinStore(storeDTO)){
+	if(storeDAO.editStoreInfo(storeDTO)){
+		int storeId = sdto.getStoreId();
+		String userId = memDTO.getId();
+		session.setAttribute("storeDTO", storeDAO.getStoreInfo(storeId, userId));
+		response.sendRedirect("StoreView.jsp?storeId=" + sdto.getStoreId());
+	}else{
 		response.sendRedirect("StoreMain.jsp");
 	}
 %>
-</head>
-<body>
-
-</body>
-</html>

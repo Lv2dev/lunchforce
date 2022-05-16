@@ -4,16 +4,20 @@
 <%@page import="com.lunchforce.store.*"%>
 <%@page import="java.util.LinkedHashMap"%>
 <%@page import="java.util.Map.Entry"%>
+<%request.setCharacterEncoding("UTF-8");%>
 <!DOCTYPE html>
 <html>
 <head>
 <%
-	Integer storeId = Integer.parseInt(request.getParameter("storeId"));
+	StoreDTO sdto = (StoreDTO)session.getAttribute("storeDTO");
 	MemberDTO mdto = (MemberDTO)session.getAttribute("memberDTO");
 	StoreDAO sdao = StoreDAO.getInstance();
-	StoreDTO sdto = sdao.getStoreInfo(storeId, mdto.getId());
 	MenuDAO mdao = MenuDAO.getInstance();
-	session.setAttribute("storeDTO", sdto);
+	int storeId;
+	storeId = Integer.parseInt(request.getParameter("storeId"));
+	sdto = sdao.getStoreInfo(storeId, mdto.getId());
+	session.setAttribute("storeDTO", sdto);//세션에 storeDTO 추가
+
 	
 	LinkedHashMap<Integer, String> hash = mdao.getAllMenu(storeId);
 %>
@@ -36,6 +40,26 @@
 			}
 	}
 	%>
-	
+<br>
+<% 
+	//주소정보가 이미 있으면 주소가 뜨게 하고 없으면 주소추가 버튼 뜨게 하기
+	StoreAddressDAO sadao = StoreAddressDAO.getInstance();
+	StoreAddressDTO sadto = sadao.getAddressInfo(sdto.getStoreId());
+	if(sadto == null){
+%>
+	<a href="NewStoreAddress.jsp">주소추가</a><br>
+<%
+	}else{
+		%>
+		<%=sadto.getAddress() %><br>
+		<%
+	}
+%>
+<a href="DeleteStore.jsp?">가게삭제</a><br> 
+<a href="EditStore.jsp">가게수정</a><br> 
+<a href="NewMenu.jsp">메뉴추가</a><br>
+<a href="EditMenuNumber.jsp">메뉴순서변경</a>
+<!-- 메뉴순서변경은 나중에... -->
+<!-- 가게 상태 보여주는 것과 가게 열기닫기 버튼 추가하기 -->
 </body>
 </html>

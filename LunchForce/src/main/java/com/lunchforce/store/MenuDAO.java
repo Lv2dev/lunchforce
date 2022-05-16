@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 import com.lunchforce.dbconnect.DBConnecter;
 import com.lunchforce.dbconnect.JDBConnect;
+import com.mysql.cj.jdbc.result.ResultSetMetaData;
+
 import java.util.LinkedHashMap;
 
 public class MenuDAO extends JDBConnect{
@@ -24,27 +26,41 @@ public class MenuDAO extends JDBConnect{
 		try {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
-			query.append("INSERT INTO menu ");
-			query.append("VAEUS(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			
+			query.append("select * from menu where store_id = " + menuDTO.getStoreId());
+			pstmt = conn.prepareStatement(query.toString());
+			rs = pstmt.executeQuery();
+			ResultSetMetaData rsmd = (ResultSetMetaData) rs.getMetaData();
+			int row = 0;
+			while(rs.next()) {
+				row++;
+			}
+			
+			query = new StringBuffer();
+			
+			query.append("INSERT INTO menu (`store_id`,`menu_name`,`price`,`notice`,`pic`,`allergy`,`feeling`,`condition`,`weather`,`temperature`,`dust`,`humidity`,`favor`,`calorie`,`health`,`category`,`menu_number`, `nutrient`) ");
+			query.append("VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 			pstmt = conn.prepareStatement(query.toString());
 
-			pstmt.setInt(2, menuDTO.getStoreId());
-			pstmt.setString(3, menuDTO.getMenuName());
-			pstmt.setInt(4, menuDTO.getPrice());
-			pstmt.setString(5, menuDTO.getNotice());
-			pstmt.setString(6, menuDTO.getPic());
-			pstmt.setInt(7, menuDTO.getAllergy());
-			pstmt.setInt(8, menuDTO.getFeeling());
-			pstmt.setInt(9, menuDTO.getCondition());
-			pstmt.setInt(10, menuDTO.getWeather());
-			pstmt.setInt(11, menuDTO.getTemperature());
-			pstmt.setInt(12, menuDTO.getDust());
-			pstmt.setInt(13, menuDTO.getHumidity());
-			pstmt.setInt(14, menuDTO.getFavor());
-			pstmt.setInt(15, menuDTO.getCalorie());
-			pstmt.setInt(16, menuDTO.getHealth());
-			pstmt.setInt(17, menuDTO.getCategory());
+			pstmt.setInt(1, menuDTO.getStoreId());
+			pstmt.setString(2, menuDTO.getMenuName());
+			pstmt.setInt(3, menuDTO.getPrice());
+			pstmt.setString(4, menuDTO.getNotice());
+			pstmt.setString(5, menuDTO.getPic());
+			pstmt.setInt(6, menuDTO.getAllergy());
+			pstmt.setInt(7, menuDTO.getFeeling());
+			pstmt.setInt(8, menuDTO.getCondition());
+			pstmt.setInt(9, menuDTO.getWeather());
+			pstmt.setInt(10, menuDTO.getTemperature());
+			pstmt.setInt(11, menuDTO.getDust());
+			pstmt.setInt(12, menuDTO.getHumidity());
+			pstmt.setInt(13, menuDTO.getFavor());
+			pstmt.setInt(14, menuDTO.getCalorie());
+			pstmt.setInt(15, menuDTO.getHealth());
+			pstmt.setInt(16, menuDTO.getCategory());
+			pstmt.setInt(17, row+1); //menu_number
+			pstmt.setInt(18, menuDTO.getNutrient());
 
 			if (pstmt.executeUpdate() == 0) {
 				return false;
@@ -52,7 +68,7 @@ public class MenuDAO extends JDBConnect{
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("memberDAO_memberJoin()_ERROR");
+			System.out.println("메뉴추가에러");
 			return false;
 		} finally {
 			disconnectPstmt();
@@ -81,6 +97,8 @@ public class MenuDAO extends JDBConnect{
 			query.append("calorie = " + "" + menuDTO.getCalorie() + ", ");
 			query.append("health = " + "" + menuDTO.getHealth() + ", ");
 			query.append("category = " + "" + menuDTO.getCategory() + ", ");
+			query.append("menu_number = " + menuDTO.getMenuNumber() + " ");
+			query.append("nutrient = " + menuDTO.getNutrient() + " ");
 			query.append("WHERE menu_id = " + "" + menuDTO.getMenuId() + "");
 
 			pstmt = conn.prepareStatement(query.toString());
@@ -99,13 +117,13 @@ public class MenuDAO extends JDBConnect{
 	}
 	
 	//메뉴 삭제
-	public synchronized boolean delMenu(MenuDTO menuDTO) throws SQLException{
+	public synchronized boolean delMenu(int menuId) throws SQLException{
 		try {
 
 			conn = dbConn.getConn();
 			query = new StringBuffer();
 			query.append("DELETE FROM menu ");
-			query.append("WHERE menu_id = '" + menuDTO.getMenuId() + "'");
+			query.append("WHERE menu_id = " + menuId + "");
 
 			pstmt = conn.prepareStatement(query.toString());
 
@@ -131,7 +149,7 @@ public class MenuDAO extends JDBConnect{
 			query = new StringBuffer();
 
 			query.append("SELECT menu_id, menu_name FROM menu ");
-			query.append("WHERE store_id = " + storeId + " ORDER BY menu_id");
+			query.append("WHERE store_id = " + storeId + " ORDER BY menu_number");
 
 			rs = stmt.executeQuery(query.toString());
 			while (rs.next()) {
@@ -181,6 +199,7 @@ public class MenuDAO extends JDBConnect{
 				menuDTO.setCalorie(rs.getInt("calorie"));
 				menuDTO.setHealth(rs.getInt("health"));
 				menuDTO.setCategory(rs.getInt("category"));
+				menuDTO.setMenuNumber(rs.getInt("menu_number"));
 				cnt++;
 			}
 

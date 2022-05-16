@@ -5,6 +5,7 @@
 <%@page import="java.util.LinkedHashMap"%>
 <%@page import="java.util.HashMap"%>
 <%@page import="java.util.Map.Entry"%>
+<%request.setCharacterEncoding("UTF-8");%>
 <!DOCTYPE html>
 <html>
 <head>

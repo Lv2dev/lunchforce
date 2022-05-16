@@ -18,9 +18,23 @@ public class MenuDTO {
 	private int calorie;
 	private int health;
 	private int category;
+	private int menuNumber;
+	private int nutrient;
 	
 	//getters and setters
 	
+	public int getNutrient() {
+		return nutrient;
+	}
+	public void setNutrient(int nutrient) {
+		this.nutrient = nutrient;
+	}
+	public int getMenuNumber() {
+		return menuNumber;
+	}
+	public void setMenuNumber(int menuNumber) {
+		this.menuNumber = menuNumber;
+	}
 	public int getMenuId() {
 		return menuId;
 	}

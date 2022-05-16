@@ -33,21 +33,22 @@ public class MenuOptionDAO extends JDBConnect{
 			int rows = 0; //이미 있는 옵션의 갯수를 카운팅 하는 변수
 			
 			query2.append("SELECT id FROM menuoption WHERE menu_id = " + menuOptionDTO.getMenuId());
+			stmt = conn.createStatement();
 			rs = stmt.executeQuery(query2.toString());
 			
 			while(rs.next()) {
 				rows++;
 			}
-			
-			stmt = conn.createStatement();
-			query.append("INSERT INTO menuoption ");
-			query.append("VAEUS(?,?,?,?,?)");
+		
+			query = new StringBuffer();
+			query.append("INSERT INTO menuoption (`menu_id`, `option_name`, `option_number`, `price`) ");
+			query.append("VALUES(?,?,?,?)");
 			
 			pstmt = conn.prepareStatement(query.toString());
-			pstmt.setInt(2, menuOptionDTO.getMenuId());
-			pstmt.setString(3, menuOptionDTO.getOptionName());
-			pstmt.setInt(4, rows);
-			pstmt.setInt(5, menuOptionDTO.getPrice());
+			pstmt.setInt(1, menuOptionDTO.getMenuId());
+			pstmt.setString(2, menuOptionDTO.getOptionName());
+			pstmt.setInt(3, rows + 1);
+			pstmt.setInt(4, menuOptionDTO.getPrice());
 			
 			if (pstmt.executeUpdate() != 1) {
 				return false;
@@ -60,12 +61,33 @@ public class MenuOptionDAO extends JDBConnect{
 			e.printStackTrace();
 			return false;
 		} finally {
-			disconnectStmt();
 			disconnectPstmt();
 		}
 	}
 	
-	//메뉴의 옵션 삭제 - 해당 순서 삭제되면 차례로 앞으로 땡겨짐!
+	//메뉴의 옵션 삭제
+	public synchronized boolean delOption(int optionId, int menuId) throws SQLException{
+		try {
+
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+			query.append("DELETE FROM menuoption ");
+			query.append("WHERE menu_id = " + menuId + " and id = " + optionId);
+
+			pstmt = conn.prepareStatement(query.toString());
+
+			if (pstmt.executeUpdate() != 1) {
+				return false;
+			}
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("옵션삭제 에러");
+			return false;
+		} finally {
+			disconnectPstmt();
+		}
+	}
 	
 	//메뉴의 옵션 순서 변경
 	

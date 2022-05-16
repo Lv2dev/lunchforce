@@ -3,6 +3,7 @@
 <%@page import="com.lunchforce.member.MemberDTO"%>
 <%@page import="com.lunchforce.member.MemberDAO"%>
 <%@page import="com.lunchforce.store.StoreDAO"%>
+<%request.setCharacterEncoding("UTF-8");%>
 <!DOCTYPE html>
 <html>
 <head>

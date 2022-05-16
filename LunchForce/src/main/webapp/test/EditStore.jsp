@@ -10,48 +10,53 @@
 	MemberDTO memDTO = (MemberDTO)session.getAttribute("memberDTO");
 	MemberDAO memDAO = MemberDAO.getInstance();
 	StoreDAO storeDAO = StoreDAO.getInstance();
+	StoreDTO sdto = (StoreDTO)session.getAttribute("storeDTO");
+	String str = sdto.getCategory();
+	
+	
 	//StoreDTO storeDTO = storeDAO.getStoreInfo(Integer.parseInt(request.getParameter("storeId")));
 	//session.setAttribute("storeDTO", storeDTO);
+	
 %>
 <meta charset="UTF-8">
 <title>가게추가페이지</title>
 </head>
 <body>
-<form action="NewStoreProc.jsp" method="post">
+<form action="EditStoreProc.jsp" method="post">
      <h1>가게</h1>
     <table border=1>
          <tr>
             <td>가게명</td>
-            <td><input type="text" name="storeName"></td>
+            <td><input type="text" name="storeName" value="<%= sdto.getStoreName() %>"></td>
          </tr>
          <tr>
             <td>카테고리</td>
             <td>
-                <input type="radio" name="category" value="한식">한식
-                <input type="radio" name="category" value="중식">중식
-                <input type="radio" name="category" value="치킨">치킨
-                <input type="radio" name="category" value="카페">카페
-                <input type="radio" name="category" value="분식">분식
-                <input type="radio" name="category" value="피자">피자
-                <input type="radio" name="category" value="양식">양식
-                <input type="radio" name="category" value="고기">고기
-                <input type="radio" name="category" value="아시안">아시안
-                <input type="radio" name="category" value="패스트푸드">패스트푸드
-                <input type="radio" name="category" value="야식">야식
-                <input type="radio" name="category" value="일식">일식
+                <input type="radio" name="category" value="한식" <%= str.equals("한식") ? "checked" : " " %>>한식
+                <input type="radio" name="category" value="중식" <%= str.equals("중식") ? "checked" : " " %>>중식
+                <input type="radio" name="category" value="치킨" <%= str.equals("치킨") ? "checked" : " " %>>치킨
+                <input type="radio" name="category" value="카페" <%= str.equals("카페") ? "checked" : " " %>>카페
+                <input type="radio" name="category" value="분식" <%= str.equals("분식") ? "checked" : " " %>>분식
+                <input type="radio" name="category" value="피자" <%= str.equals("피자") ? "checked" : " " %>>피자
+                <input type="radio" name="category" value="양식" <%= str.equals("양식") ? "checked" : " " %>>양식
+                <input type="radio" name="category" value="고기" <%= str.equals("고기") ? "checked" : " " %>>고기
+                <input type="radio" name="category" value="아시안" <%= str.equals("아시안") ? "checked" : " " %>>아시안
+                <input type="radio" name="category" value="패스트푸드" <%= str.equals("패스트푸드") ? "checked" : " " %>>패스트푸드
+                <input type="radio" name="category" value="야식" <%= str.equals("야식") ? "checked" : " " %>>야식
+                <input type="radio" name="category" value="일식" <%= str.equals("일식") ? "checked" : " " %>>일식
             </td>
         </tr>
         <tr>
             <td>가게 공지사항</td>
-            <td><input type="text" name="notice"></td>
+            <td><input type="text" name="notice" value="<%= sdto.getNotice() %>"></td> 
         </tr>
         <tr>
             <td>가게 전화번호</td>
-            <td><input type="tel" name="tel"></td>
+            <td><input type="tel" name="tel" value="<%= sdto.getNotice() %>"></td>
         </tr>
         <tr>
             <td>가게 이미지</td>
-            <td><input type="image" src="" name="thumb"></td>
+            <td><input type="image" src="" name="thumb" value="구현중"></td>
         </tr>
         <tr>
             <td>가게 오픈 시간</td>
