@@ -16,6 +16,9 @@ public class MemberDTO {
 	private int gender; //남자0 여자1
 	private String question;
 	private String answer;
+	private String address;
+	private double addressX;
+	private double addressY;
 	
 	
 	//getters and setters;
@@ -93,8 +96,27 @@ public class MemberDTO {
 	}
 	
 	
+	
 	//method
 	
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public double getAddressX() {
+		return addressX;
+	}
+	public void setAddressX(double addressX) {
+		this.addressX = addressX;
+	}
+	public double getAddressY() {
+		return addressY;
+	}
+	public void setAddressY(double addressY) {
+		this.addressY = addressY;
+	}
 	//회원가입용 String getter
 	public String getMemberJoinString() {
 		if(id == null || pw == null || name == null || nickname == null || tel == null || email == null || bDay == null || jDay == null || type == 0) {

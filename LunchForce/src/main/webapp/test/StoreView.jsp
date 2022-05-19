@@ -43,15 +43,14 @@
 <br>
 <% 
 	//주소정보가 이미 있으면 주소가 뜨게 하고 없으면 주소추가 버튼 뜨게 하기
-	StoreAddressDAO sadao = StoreAddressDAO.getInstance();
-	StoreAddressDTO sadto = sadao.getAddressInfo(sdto.getStoreId());
-	if(sadto == null){
+	sdto = sdao.getAddressInfo(storeId);
+	if(sdto == null){
 %>
 	<a href="NewStoreAddress.jsp">주소추가</a><br>
 <%
 	}else{
 		%>
-		<%=sadto.getAddress() %><br>
+		<%=sdto.getAddress() %><br>
 		<%
 	}
 %>

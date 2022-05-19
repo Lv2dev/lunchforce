@@ -21,6 +21,9 @@ public class StoreDTO {
 	private Timestamp joinDay;
 	private String storeName;
 	private int status;
+	private String address;
+	private double addressX;
+	private double addressY;
 	
 
 	//getters and setters
@@ -108,6 +111,24 @@ public class StoreDTO {
 	}
 	public void setStoreName(String storeName) {
 		this.storeName = storeName;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public double getAddressX() {
+		return addressX;
+	}
+	public void setAddressX(double addressX) {
+		this.addressX = addressX;
+	}
+	public double getAddressY() {
+		return addressY;
+	}
+	public void setAddressY(double addressY) {
+		this.addressY = addressY;
 	}
 	
 }

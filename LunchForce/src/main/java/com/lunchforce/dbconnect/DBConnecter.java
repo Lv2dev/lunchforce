@@ -19,7 +19,7 @@ public class DBConnecter {
 	private DataSource dataSource;
 	
 	//생성자
-	public DBConnecter(){
+	private DBConnecter(){
 		try {
 			//Connection pool 사용
 			context = new InitialContext();

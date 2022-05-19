@@ -7,6 +7,7 @@ import java.sql.Statement;
 
 import com.lunchforce.dbconnect.DBConnecter;
 import com.lunchforce.dbconnect.JDBConnect;
+import com.lunchforce.store.StoreDTO;
 
 import java.sql.ResultSet;
 
@@ -314,6 +315,71 @@ public class MemberDAO extends JDBConnect{
 			return false;
 		} finally {
 			disconnectPstmt();
+		}
+	}
+	
+	//주소추가
+	public synchronized boolean newAddress(MemberDTO mdto) throws SQLException {
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+			query.append("update user set ");
+			query.append("address = ?, address_x = ?, address_y = ? where id = '" + mdto.getId() + "'");
+
+			pstmt = conn.prepareStatement(query.toString());
+			
+			pstmt.setString(1, mdto.getAddress());
+			pstmt.setDouble(2, mdto.getAddressX());
+			pstmt.setDouble(3, mdto.getAddressY());
+			
+
+			if (pstmt.executeUpdate() != 1) {
+				return false;
+			}
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println(e.getMessage());
+			System.out.println("주소추가에러");
+			return false;
+		} finally {
+			disconnectPstmt();
+		}
+	}
+	
+	//주소 가져오기
+	public synchronized MemberDTO getAddressInfo(String id) throws SQLException {
+		try {
+			conn = dbConn.getConn();
+			stmt = conn.createStatement();
+			query = new StringBuffer();
+
+			query.append("SELECT * FROM user ");
+			query.append("WHERE id = '" + id + "' and address IS NOT null");
+
+			rs = stmt.executeQuery(query.toString());
+
+			int cnt = 0;
+			MemberDTO mdto = new MemberDTO();
+			while (rs.next()) {
+				mdto.setId(rs.getString("id"));
+				mdto.setAddressX(rs.getDouble("address_x"));
+				mdto.setAddressX(rs.getDouble("address_y"));
+				mdto.setAddress(rs.getString("address"));
+				cnt++;
+			}
+
+			if (cnt != 1) {
+				return null;
+			}
+
+			return mdto;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("주소가져오기 에러 \n" + e.getMessage());
+			return null;
+		} finally {
+			disconnectStmt();
 		}
 	}
 }

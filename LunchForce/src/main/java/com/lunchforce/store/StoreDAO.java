@@ -247,8 +247,7 @@ public class StoreDAO extends JDBConnect {
 			conn = dbConn.getConn();
 			stmt = conn.createStatement();
 			query = new StringBuffer();
-			query.append("SELECT * from store ");
-			query.append("WHERE store_name like '%" + keyword + "%' order by store_name");
+			query.append("select store.store_id, store.store_name from store inner join menu on store.store_id = menu.store_id and (store.store_name like '%" + keyword + "%' or menu.menu_name like '%" + keyword + "%') group by store.store_id;");
 
 			rs = stmt.executeQuery(query.toString());
 			int cnt = 0;
@@ -271,5 +270,70 @@ public class StoreDAO extends JDBConnect {
 			disconnectStmt();
 		}
 	}
+	
+	//주소추가
+		public synchronized boolean newAddress(StoreDTO sdto) throws SQLException {
+			try {
+				conn = dbConn.getConn();
+				query = new StringBuffer();
+				query.append("update store set ");
+				query.append("address = ?, address_x = ?, address_y = ? where store_Id = " + sdto.getStoreId());
+
+				pstmt = conn.prepareStatement(query.toString());
+				
+				pstmt.setString(1, sdto.getAddress());
+				pstmt.setDouble(2, sdto.getAddressX());
+				pstmt.setDouble(3, sdto.getAddressY());
+				
+
+				if (pstmt.executeUpdate() != 1) {
+					return false;
+				}
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println(e.getMessage());
+				System.out.println("주소추가에러");
+				return false;
+			} finally {
+				disconnectPstmt();
+			}
+		}
+		
+		//주소 가져오기
+		public synchronized StoreDTO getAddressInfo(int storeId) throws SQLException {
+			try {
+				conn = dbConn.getConn();
+				stmt = conn.createStatement();
+				query = new StringBuffer();
+
+				query.append("SELECT * FROM store ");
+				query.append("WHERE store_id = " + storeId + " and address IS NOT null");
+
+				rs = stmt.executeQuery(query.toString());
+
+				int cnt = 0;
+				StoreDTO sDTO = new StoreDTO();
+				while (rs.next()) {
+					sDTO.setStoreId(rs.getInt("store_id"));
+					sDTO.setAddressX(rs.getDouble("address_x"));
+					sDTO.setAddressX(rs.getDouble("address_y"));
+					sDTO.setAddress(rs.getString("address"));
+					cnt++;
+				}
+
+				if (cnt != 1) {
+					return null;
+				}
+
+				return sDTO;
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("주소가져오기 에러 \n" + e.getMessage());
+				return null;
+			} finally {
+				disconnectStmt();
+			}
+		}
 
 }

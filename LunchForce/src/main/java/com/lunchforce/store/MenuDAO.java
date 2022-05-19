@@ -218,6 +218,7 @@ public class MenuDAO extends JDBConnect{
 	}
 	
 
+
 	// 인스턴스 getter
 	public static MenuDAO getInstance() {
 		if (menuDAO == null) {

@@ -6,14 +6,15 @@
 
 <%
 	MemberDAO mdao = MemberDAO.getInstance();
+	MemberDTO mdtoAdd = new MemberDTO();
 	
 	MemberDTO mdto = (MemberDTO)session.getAttribute("memberDTO");
 	
-	mdto.setAddress(request.getParameter("address"));
-	mdto.setAddressX(Double.parseDouble(request.getParameter("x")));
-	mdto.setAddressY(Double.parseDouble(request.getParameter("y")));
-	mdto.setId(mdto.getId());
+	mdtoAdd.setAddress(request.getParameter("address"));
+	mdtoAdd.setAddressX(Double.parseDouble(request.getParameter("x")));
+	mdtoAdd.setAddressY(Double.parseDouble(request.getParameter("y")));
+	mdtoAdd.setId(mdto.getId());
 	
-	mdao.newAddress(mdto); 
-	response.sendRedirect("address.jsp");
+	mdao.newAddress(mdtoAdd);
+	response.sendRedirect("MemberAddress.jsp");
 %>

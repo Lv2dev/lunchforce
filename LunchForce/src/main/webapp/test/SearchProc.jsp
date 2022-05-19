@@ -7,10 +7,16 @@
 <%
 	StoreDAO sdao = StoreDAO.getInstance();
 	String keyword = request.getParameter("search");
+	String type = request.getParameter("type");
 	ArrayList<StoreDTO> list = sdao.getSearchList(keyword);
+	
+	if(list != null){
 	for(StoreDTO i : list){
 		%>
 		<a href="StorePage.jsp?storeId=<%=i.getStoreId()%>"><%= i.getStoreName() %></a><br>
 		<%
+	}
+	}else{
+		out.println("없어요");
 	}
 %>
