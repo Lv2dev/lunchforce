@@ -12,7 +12,7 @@
 	int storeId = sdto.getStoreId(); 
 	int menuId = Integer.parseInt(request.getParameter("menuId"));
 	MenuDAO mdao = MenuDAO.getInstance();
-	MenuDTO mdto = mdao.getStoreInfo(storeId, menuId);
+	MenuDTO mdto = mdao.getMenuInfo(menuId);
 	MenuOptionDAO optionDao = MenuOptionDAO.getInstance();
 	ArrayList<MenuOptionDTO> list = optionDao.getOptionList(menuId);
 	session.setAttribute("menuDTO", mdto);

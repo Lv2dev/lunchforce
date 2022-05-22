@@ -6,9 +6,12 @@
 <%request.setCharacterEncoding("UTF-8");%>
 <%
 	StoreDAO sdao = StoreDAO.getInstance();
+	MemberDAO mdao = MemberDAO.getInstance();
+	MemberDTO mdto = (MemberDTO)session.getAttribute("memberDTO");
 	String keyword = request.getParameter("search");
+	int distance = Integer.parseInt(request.getParameter("distance"));
 	String type = request.getParameter("type");
-	ArrayList<StoreDTO> list = sdao.getSearchList(keyword);
+	ArrayList<StoreDTO> list = sdao.getSearchList(keyword, mdto.getAddressX(), mdto.getAddressY(), distance);
 	
 	if(list != null){
 	for(StoreDTO i : list){

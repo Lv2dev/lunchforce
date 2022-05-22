@@ -167,14 +167,14 @@ public class MenuDAO extends JDBConnect{
 	
 	
 	//가게아이디와 메뉴아이디 넣으면 메뉴정보 가져오기
-	public synchronized MenuDTO getStoreInfo(int storeId, int menuId) throws SQLException {
+	public synchronized MenuDTO getMenuInfo(int menuId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 
 			query.append("SELECT * FROM menu ");
-			query.append("WHERE menu_id = " + menuId + " and store_id = " + storeId);
+			query.append("WHERE menu_id = " + menuId);
 
 			rs = stmt.executeQuery(query.toString());
 
@@ -182,7 +182,6 @@ public class MenuDAO extends JDBConnect{
 
 			int cnt = 0;
 			while (rs.next()) {
-				menuDTO.setStoreId(storeId);
 				menuDTO.setMenuId(menuId);
 				menuDTO.setMenuName(rs.getString("menu_name"));
 				menuDTO.setPrice(rs.getInt("price"));

@@ -93,7 +93,7 @@ public class MenuOptionDAO extends JDBConnect{
 	
 	//메뉴의 옵션 가져오기(return DTO)
 	
-	//모든 메뉴 LinkedHash로 가져오기
+	//모든 메뉴 ArrayList로 가져오기
 	public synchronized ArrayList<MenuOptionDTO> getOptionList(int menuId) throws SQLException{
 		ArrayList<MenuOptionDTO> list = new ArrayList<MenuOptionDTO>();
 		try {

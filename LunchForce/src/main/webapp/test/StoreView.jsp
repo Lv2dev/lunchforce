@@ -15,8 +15,10 @@
 	MenuDAO mdao = MenuDAO.getInstance();
 	int storeId;
 	storeId = Integer.parseInt(request.getParameter("storeId"));
-	sdto = sdao.getStoreInfo(storeId, mdto.getId());
+	sdto = sdao.getStoreInfo(storeId);
 	session.setAttribute("storeDTO", sdto);//세션에 storeDTO 추가
+	
+	int state = sdao.getState(storeId);//가게의 현재상태 가져오기
 
 	
 	LinkedHashMap<Integer, String> hash = mdao.getAllMenu(storeId);
@@ -51,13 +53,26 @@
 	}else{
 		%>
 		<%=sdto.getAddress() %><br>
+		<a href="NewStoreAddress.jsp">주소수정</a><br>
 		<%
 	}
 %>
 <a href="DeleteStore.jsp?">가게삭제</a><br> 
 <a href="EditStore.jsp">가게수정</a><br> 
 <a href="NewMenu.jsp">메뉴추가</a><br>
-<a href="EditMenuNumber.jsp">메뉴순서변경</a>
+<a href="EditMenuNumber.jsp">메뉴순서변경</a><br>
+<%
+	
+	if(state == 1){
+		%>
+		<a href="StoreClose.jsp">가게가 열려있어요. 눌러서 닫기</a>
+		<%
+	}else if(state == 0){
+		%>
+		<a href="StoreOpen.jsp">가게가 닫혀있어요. 눌러서 열기</a>
+		<%
+	}
+%>
 <!-- 메뉴순서변경은 나중에... -->
 <!-- 가게 상태 보여주는 것과 가게 열기닫기 버튼 추가하기 -->
 </body>

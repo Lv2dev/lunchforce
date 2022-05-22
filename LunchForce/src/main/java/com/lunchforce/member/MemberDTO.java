@@ -10,8 +10,8 @@ public class MemberDTO {
 	private String nickname;
 	private String tel;
 	private String email;
-	private Timestamp bDay;
-	private Timestamp jDay;
+	private Date bDay;
+	private Date jDay;
 	private int type; //관리자0 사업자1 일반2
 	private int gender; //남자0 여자1
 	private String question;
@@ -58,16 +58,16 @@ public class MemberDTO {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public Timestamp getbDay() {
+	public Date getbDay() {
 		return bDay;
 	}
-	public void setbDay(Timestamp bDay) {
+	public void setbDay(Date bDay) {
 		this.bDay = bDay;
 	}
-	public Timestamp getjDay() {
+	public Date getjDay() {
 		return jDay;
 	}
-	public void setjDay(Timestamp jDay) {
+	public void setjDay(Date jDay) {
 		this.jDay = jDay;
 	}
 	public int getType() {
@@ -94,11 +94,6 @@ public class MemberDTO {
 	public void setAnswer(String answer) {
 		this.answer = answer;
 	}
-	
-	
-	
-	//method
-	
 	public String getAddress() {
 		return address;
 	}
@@ -116,14 +111,5 @@ public class MemberDTO {
 	}
 	public void setAddressY(double addressY) {
 		this.addressY = addressY;
-	}
-	//회원가입용 String getter
-	public String getMemberJoinString() {
-		if(id == null || pw == null || name == null || nickname == null || tel == null || email == null || bDay == null || jDay == null || type == 0) {
-			return null;
-		}
-		else {
-			return "'" + id  + "', '" + pw + "', '" + name + "', '" + name + "', '" + nickname + "', '" + tel + "', '" + email + "', '" + bDay + "," + jDay + ", '" + type;
-		}
 	}
 }

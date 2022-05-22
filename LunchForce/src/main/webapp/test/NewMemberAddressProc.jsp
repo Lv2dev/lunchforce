@@ -16,5 +16,6 @@
 	mdtoAdd.setId(mdto.getId());
 	
 	mdao.newAddress(mdtoAdd);
+	session.setAttribute("memberDTO", mdao.getMemberInfo(mdto.getId())); //세션의 memberDTO 갱신
 	response.sendRedirect("MemberAddress.jsp");
 %>

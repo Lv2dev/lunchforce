@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import com.lunchforce.dbconnect.DBConnecter;
 import com.lunchforce.dbconnect.JDBConnect;
@@ -69,7 +72,13 @@ public class MemberDAO extends JDBConnect{
 			conn = dbConn.getConn();
 			query = new StringBuffer();
 			query.append("INSERT INTO user ");
-			query.append("VAEUS(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			query.append("VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Calendar cal = Calendar.getInstance();
+			String today = null;
+			today = formatter.format(cal.getTime());
+			Timestamp ts = Timestamp.valueOf(today);
 
 			pstmt = conn.prepareStatement(query.toString());
 
@@ -79,8 +88,8 @@ public class MemberDAO extends JDBConnect{
 			pstmt.setString(4, memberDTO.getNickname());
 			pstmt.setString(5, memberDTO.getTel());
 			pstmt.setString(6, memberDTO.getEmail());
-			pstmt.setTimestamp(7, memberDTO.getbDay());
-			pstmt.setTimestamp(8, memberDTO.getjDay());
+			pstmt.setDate(7, memberDTO.getbDay());
+			pstmt.setTimestamp(8, ts);
 			pstmt.setInt(9, memberDTO.getType());
 			pstmt.setInt(10, memberDTO.getGender());
 
@@ -240,8 +249,8 @@ public class MemberDAO extends JDBConnect{
 				memberDTO.setNickname(rs.getString("nickname"));
 				memberDTO.setTel(rs.getString("tel"));
 				memberDTO.setEmail(rs.getString("email"));
-				memberDTO.setbDay(rs.getTimestamp("bday"));
-				memberDTO.setjDay(rs.getTimestamp("jday"));
+				memberDTO.setbDay(rs.getDate("bday"));
+				memberDTO.setjDay(rs.getDate("jday"));
 				memberDTO.setType(rs.getInt("type"));
 				memberDTO.setGender(rs.getInt("gender"));
 				memberDTO.setQuestion(rs.getString("question"));
@@ -275,7 +284,7 @@ public class MemberDAO extends JDBConnect{
 			query.append(" nickname = " + "'" + memberDTO2.getNickname() + "', " );
 			query.append(" tel = " + "'" + memberDTO2.getTel() + "', " );
 			query.append(" email = " + "'" + memberDTO2.getEmail() + "', " );
-			query.append(" question = " + "'" + memberDTO2.getQuestion() + "' " );
+			query.append(" question = " + "'" + memberDTO2.getQuestion() + "', " );
 			query.append(" answer = " + "'" + memberDTO2.getAnswer() + "' " );
 			query.append("WHERE id = " + "'" + memberDTO2.getId() + "'");
 			

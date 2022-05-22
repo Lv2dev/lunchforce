@@ -7,14 +7,16 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<input type="text" id="sample5_address" placeholder="주소">
+<input type="text" id="sample5_address" placeholder="주소">
 <input type="button" onclick="sample5_execDaumPostcode()" value="주소 검색"><br>
+<input type="text" id="detail" placeholder="상세주소 입력">
 <div id="map" style="width:300px;height:300px;margin-top:10px;display:none"></div>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=60fe788f0ea06f351b62582019d41e56&libraries=services"></script>
 <script>
 	var x, y, address;
+	
     var mapContainer = document.getElementById('map'), // 지도를 표시할 div
         mapOption = {
             center: new daum.maps.LatLng(37.537187, 127.005476), // 지도의 중심좌표
@@ -44,7 +46,7 @@
                 geocoder.addressSearch(data.address, function(results, status) {
                     // 정상적으로 검색이 완료됐으면
                     if (status === daum.maps.services.Status.OK) {
-
+                    	
                         var result = results[0]; //첫번째 결과의 값을 활용
 
                         // 해당 주소에 대한 좌표를 받아서
@@ -65,7 +67,8 @@
     }
     
     function goProc(){
-    	location.replace("NewStoreAddressProc.jsp?x=" + x + "&y=" + y + "&address=" + address);
+    	var detail = " " + document.getElementById('detail').value;
+    	location.replace("NewStoreAddressProc.jsp?x=" + x + "&y=" + y + "&address=" + address + "&detail=" + detail);
     }
 </script>
 <button onclick="goProc()">제출</button>
