@@ -108,63 +108,81 @@ public class OrderDAO extends JDBConnect {
 			}
 			//장바구니에 추가한 내용 업데이트
 			//1. ordermenu 추가하기
-			query = new StringBuffer();
-			query.append("INSERT INTO ordermenu (`orderlist_id`,`menu_id`,`menu_name`,`price`) ");
-			query.append("VALUES(");
-			query.append("(select orderlist_id from orderlist where user_id = ? and state=0),");
-			query.append("(select menu_id from menu where menu_id = ?),");
-			query.append("(select menu_name from menu where menu_id = ?),");
-			query.append("(select price from menu where menu_id = ?))");
-			pstmt = conn.prepareStatement(query.toString());
-			pstmt.setString(1, userId);
-			pstmt.setInt(2, menuId);
-			pstmt.setInt(3, menuId);
-			pstmt.setInt(4, menuId);
-			pstmt.executeUpdate();
-			pstmt.close();
+			try {
+				query = new StringBuffer();
+				query.append("INSERT INTO ordermenu (`orderlist_id`,`menu_id`,`menu_name`,`price`) ");
+				query.append("VALUES(");
+				query.append("(select orderlist_id from orderlist where user_id = ? and status = 0),");
+				query.append("(select menu_id from menu where menu_id = ?),");
+				query.append("(select menu_name from menu where menu_id = ?),");
+				query.append("(select price from menu where menu_id = ?))");
+				pstmt = conn.prepareStatement(query.toString());
+				pstmt.setString(1, userId);
+				pstmt.setInt(2, menuId);
+				pstmt.setInt(3, menuId);
+				pstmt.setInt(4, menuId);
+				pstmt.executeUpdate();
+				pstmt.close();
+			} catch (Exception e) {
+				// TODO: handle exception
+				System.out.println("1. ordermenu 추가하기" + e.getMessage());
+			}
 			//2. orderoption 추가하기
 			if(optionId.length > 0) { //들어온 옵션이 1개 이상이면 수행
-				for(int i = 0; i < optionId.length; i++) {
-					query = new StringBuffer();
-					query.append("INSERT INTO orderoption (`ordermenu_Id`,`option_id`,`menu_name`,`price`) ");
-					query.append("VALUES(");
-					query.append("(select distinct ordermenu.id from orderlist inner join ordermenu on orderlist.orderlist_id = ordermenu.orderlist_id and(orderlist.user_id = ? and orderlist.status = 0 and ordermenu.menu_id = ?)),");
-					query.append("(select id from menuoption where id = ? and menu_id = ?),");
-					query.append("(select price from menuoption where id = ? and menu_id = ?),");
-					query.append("(select option_name from menuoption where id = ? and menu_id = ?))");
-					pstmt = conn.prepareStatement(query.toString());
-					pstmt.setString(1, userId);
-					pstmt.setInt(2, menuId);
-					pstmt.setInt(3, optionId[i]);
-					pstmt.setInt(4, menuId);
-					pstmt.setInt(5, optionId[i]);
-					pstmt.setInt(6, menuId);
-					pstmt.setInt(7, optionId[i]);
-					pstmt.setInt(8, menuId);
-					pstmt.executeUpdate();
-					pstmt.close();
+				
+				try {
+					for(int i = 0; i < optionId.length; i++) {
+						query = new StringBuffer();
+						query.append("INSERT INTO orderoption (`ordermenu_id`,`option_id`,`option_name`,`price`) ");
+						query.append("VALUES(");
+						query.append("(select * from (select ordermenu.id from orderlist inner join ordermenu on orderlist.orderlist_id = ordermenu.orderlist_id ");
+						query.append("inner join orderoption on orderoption.ordermenu_id != ordermenu.id ");
+						query.append("and(orderlist.user_id = ? and orderlist.status = 0 and ordermenu.menu_id = ?) limit 1) as a), ");
+						query.append("(select * from(select id from menuoption where id = ? and menu_id = ?) as b),");
+						query.append("(select * from(select option_name from menuoption where id = ? and menu_id = ?) as c),");
+						query.append("(select * from(select price from menuoption where id = ? and menu_id = ?) as d)) ");
+						pstmt = conn.prepareStatement(query.toString());
+						pstmt.setString(1, userId);
+						pstmt.setInt(2, menuId);
+						pstmt.setInt(3, optionId[i]);
+						pstmt.setInt(4, menuId);
+						pstmt.setInt(5, optionId[i]);
+						pstmt.setInt(6, menuId);
+						pstmt.setInt(7, optionId[i]);
+						pstmt.setInt(8, menuId);
+						pstmt.executeUpdate();
+						pstmt.close();
+					}
+				} catch (Exception e) {
+					// TODO: handle exception
+					System.out.println("2.orderoption 추가하기" + e.getMessage());
 				}
 			}
 			//3. order 테이블의 값 수정하기(가격계산해서)
-			query = new StringBuffer();
-			query.append(" update orderlist as ol1 set ");
-			query.append(" price = ( ");
-			query.append(" select sum1 from(");
-			query.append(" select sum(oo.price) as sum1 from (");
-			query.append(" select om.id  from orderlist as ol left join ordermenu as om on ol.orderlist_id = om.orderlist_id and (ol.user_id=? and status = '0')"); //유저아이디 입력
-			query.append(" )as A inner join orderoption as oo on A.id = oo.ordermenu_id");
-			query.append(" )as D");
-			query.append(" )+(");
-			query.append(" select sum2 from (select sum(om.price) as sum2 from orderlist as ol inner join ordermenu as om on ol.orderlist_id = om.orderlist_id) as B");
-			query.append(" )");
-			query.append(" where ol1.orderlist_id  = (");
-			query.append(" select idid from (");
-			query.append(" select distinct ol3.orderlist_id as idid from orderlist as ol3 where user_id = ? and status = 0"); //유저아이디 입력
-			query.append(" ) as C");
-			query.append(" );");
-			pstmt = conn.prepareStatement(query.toString());
-			pstmt.setString(1, userId);
-			pstmt.setString(2, userId);
+			try {
+				query = new StringBuffer();
+				query.append(" update orderlist as ol1 set ");
+				query.append(" price = ( ");
+				query.append(" select sum1 from(");
+				query.append(" select sum(oo.price) as sum1 from (");
+				query.append(" select om.id  from orderlist as ol left join ordermenu as om on ol.orderlist_id = om.orderlist_id and (ol.user_id=? and status = '0')"); //유저아이디 입력
+				query.append(" )as A inner join orderoption as oo on A.id = oo.ordermenu_id");
+				query.append(" )as D");
+				query.append(" )+(");
+				query.append(" select sum2 from (select sum(om.price) as sum2 from orderlist as ol inner join ordermenu as om on ol.orderlist_id = om.orderlist_id) as B");
+				query.append(" )");
+				query.append(" where ol1.orderlist_id  = (");
+				query.append(" select idid from (");
+				query.append(" select distinct ol3.orderlist_id as idid from orderlist as ol3 where user_id = ? and status = 0"); //유저아이디 입력
+				query.append(" ) as C");
+				query.append(" );");
+				pstmt = conn.prepareStatement(query.toString());
+				pstmt.setString(1, userId);
+				pstmt.setString(2, userId);
+				
+			} catch (Exception e) {
+				System.out.println("3. order 테이블의 값 수정하기(가격계산해서)" + e.getMessage());
+			}
 			if(pstmt.executeUpdate() > 0){
 				return true;
 			}else {
@@ -175,6 +193,7 @@ public class OrderDAO extends JDBConnect {
 			System.out.println("장바구니 추가 에러");
 			return false;
 		} finally {
+			
 			disconnectPstmt();
 		}
 	}
