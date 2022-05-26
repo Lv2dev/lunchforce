@@ -40,5 +40,5 @@
 	}
 	%>
 	<br>
-<a href="Order.jsp">장바구니</a>
+<a href="Shopping.jsp">장바구니</a>
 	
