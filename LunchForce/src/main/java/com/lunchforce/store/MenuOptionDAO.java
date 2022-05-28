@@ -92,6 +92,36 @@ public class MenuOptionDAO extends JDBConnect{
 	//메뉴의 옵션 순서 변경
 	
 	//메뉴의 옵션 가져오기(return DTO)
+	public synchronized MenuOptionDTO getOptionInfo(int optionId) throws SQLException{
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+			
+			query.append("SELECT * FROM menuoption ");
+			query.append("WHERE id = ?"); //optionId
+			
+			pstmt = conn.prepareStatement(query.toString());
+			
+			pstmt.setInt(1, optionId);
+			
+			rs = pstmt.executeQuery();
+			
+			int cnt = 0;
+			MenuOptionDTO moDTO = new MenuOptionDTO();
+			while(rs.next()) {
+				moDTO.setId(rs.getInt("id"));
+				moDTO.setMenuId(rs.getInt("menu_id"));
+				moDTO.setOptionName(rs.getString("option_name"));
+				moDTO.setOptionNumber(rs.getInt("option_number"));
+				moDTO.setPrice(rs.getInt("price"));
+			}
+			return moDTO;
+		}catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("옵션정보 가져오기 오류 " + e.getMessage());
+			return null;
+		}
+	}
 	
 	//모든 메뉴 ArrayList로 가져오기
 	public synchronized ArrayList<MenuOptionDTO> getOptionList(int menuId) throws SQLException{
