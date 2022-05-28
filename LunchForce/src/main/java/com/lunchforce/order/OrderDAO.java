@@ -133,20 +133,23 @@ public class OrderDAO extends JDBConnect {
 					for (int i = 0; i < optionId.length; i++) {
 						query = new StringBuffer();
 						query.append("INSERT INTO orderoption (`ordermenu_id`,`option_id`,`option_name`,`price`) ");
-						query.append("VALUES(");
+						query.append("VALUES((");
+						query.append("select a.id from orderlist as ol inner join ( ");
 						query.append(
-								"(select * from (select ordermenu.id from orderlist inner join ordermenu on orderlist.orderlist_id = ordermenu.orderlist_id ");
-						query.append("left join orderoption on orderoption.ordermenu_id = ordermenu.id ");
-						query.append("and(orderlist.user_id = ? and orderlist.status = 0 and orderoption.ordermenu_id = null and ordermenu.menu_id = ?) limit 1) as a), ");
-						//userId, menuId
-						query.append("(select * from(select id from menuoption where id = ? and menu_id = ? limit 1) as b),");
-						//optionId[i], menuId
+								"select om.id as id, om.orderlist_id as orderlist_id, om.menu_id as menu_id from ordermenu as om left join orderoption as oo  ");
+						query.append("on om.id = oo.ordermenu_id where oo.id is null) as a ");
+						query.append(
+								"on ol.orderlist_id = a.orderlist_id and (ol.user_id = ? and ol.status = 0 and a.menu_id = ?) limit 1), ");
+						// userId, menuId
+						query.append(
+								"(select * from(select id from menuoption where id = ? and menu_id = ? limit 1) as b),");
+						// optionId[i], menuId
 						query.append(
 								"(select * from(select option_name from menuoption where id = ? and menu_id = ? limit 1) as c),");
-						//optionId[i], menuId
+						// optionId[i], menuId
 						query.append(
-								"(select * from(select price from menuoption where id = ? and menu_id = ? limit 1) as d)) ");
-						//optionId[i], menuId
+								"(select * from(select price from menuoption where id = ? and menu_id = ? limit 1) as d)); ");
+						// optionId[i], menuId
 						pstmt = conn.prepareStatement(query.toString());
 						pstmt.setString(1, userId);
 						pstmt.setInt(2, menuId);
@@ -161,6 +164,7 @@ public class OrderDAO extends JDBConnect {
 					}
 				} catch (Exception e) {
 					// TODO: handle exception
+					e.printStackTrace();
 					System.out.println("2.orderoption 추가하기" + e.getMessage());
 				}
 			}
@@ -255,8 +259,7 @@ public class OrderDAO extends JDBConnect {
 	// 장바구니 내용을 가져오는 2차원 ArrayList
 	// index 0 : ordermenu.id
 	// index 1~ : orderoption.id
-	public synchronized ArrayList<ArrayList<Integer>> getOrderList(String userId, int status)
-			throws SQLException {
+	public synchronized ArrayList<ArrayList<Integer>> getOrderList(String userId, int status) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
@@ -266,7 +269,7 @@ public class OrderDAO extends JDBConnect {
 			query.append("FROM orderlist as ol INNER JOIN ordermenu as om ON ol.orderlist_id = om.orderlist_id ");
 			query.append("LEFT JOIN orderoption as oo ON om.id = oo.ordermenu_id ");
 			query.append("AND (ol.user_id = ? AND ol.status = ?)");
-			//userId, status
+			// userId, status
 			pstmt = conn.prepareStatement(query.toString());
 
 			pstmt.setString(1, userId);
@@ -279,40 +282,40 @@ public class OrderDAO extends JDBConnect {
 			while (rs.next()) {
 				int tempOrdermenuId = rs.getInt("ordermenu_id");
 				int temp = 0;
-				//만약에 list안에 해당 ordermenu_id가 있으면 수행
-				
-				if(list.size() == 0) {//list 안에 들어간게 없는 경우
+				// 만약에 list안에 해당 ordermenu_id가 있으면 수행
+
+				if (list.size() == 0) {// list 안에 들어간게 없는 경우
 					ArrayList<Integer> tempList = new ArrayList<Integer>();
-					tempList.add(rs.getInt("ordermenu_id")); //ordermenu_id를 삽입
-					//만약 딸린 옵션이 있으면 옵션도 삽입
+					tempList.add(rs.getInt("ordermenu_id")); // ordermenu_id를 삽입
+					// 만약 딸린 옵션이 있으면 옵션도 삽입
 					temp = 0;
 					temp = rs.getInt("orderoption_id");
-					if(temp > 0) {
+					if (temp > 0) {
 						tempList.add(temp);
 					}
-					//list에 임시 arraylist를 삽입
+					// list에 임시 arraylist를 삽입
 					list.add(tempList);
-				}else { //아닌경우
-					for(int i = 0; i < list.size(); i++) {
-						//list 안에 해당 ordermenu_id가 있는지 체크
+				} else { // 아닌경우
+					for (int i = 0; i < list.size(); i++) {
+						// list 안에 해당 ordermenu_id가 있는지 체크
 						ArrayList<Integer> tempList = list.get(i);
-						if(tempList.get(0) == tempOrdermenuId) {
-							//있으면 옵션이 있을 때 해당 옵션 삽입
+						if (tempList.get(0) == tempOrdermenuId) {
+							// 있으면 옵션이 있을 때 해당 옵션 삽입
 							temp = 0;
 							temp = rs.getInt("orderoption_id");
-							if(temp > 0) {
+							if (temp > 0) {
 								tempList.add(temp);
-								
+
 							}
 							break;
 						}
-						if(i == (list.size() - 1)){ //끝까지 돌았는데 ordermenu_id가 없으면
-							tempList = new ArrayList<Integer>(); //새로운 arraylist 삽입
+						if (i == (list.size() - 1)) { // 끝까지 돌았는데 ordermenu_id가 없으면
+							tempList = new ArrayList<Integer>(); // 새로운 arraylist 삽입
 							tempList.add(rs.getInt("ordermenu_id"));
-							//옵션이 있을 때 해당 옵션 삽입
+							// 옵션이 있을 때 해당 옵션 삽입
 							temp = 0;
 							temp = rs.getInt("orderoption_id");
-							if(temp > 0) {
+							if (temp > 0) {
 								tempList.add(temp);
 							}
 							list.add(tempList);
@@ -320,13 +323,13 @@ public class OrderDAO extends JDBConnect {
 						}
 					}
 				}
-				
+
 				cnt++;
 			}
-			
-			//test
-			for(ArrayList<Integer> a : list) {
-				for(Integer b : a) {
+
+			// test
+			for (ArrayList<Integer> a : list) {
+				for (Integer b : a) {
 					System.out.print(b + " ");
 				}
 				System.out.println();
@@ -344,31 +347,31 @@ public class OrderDAO extends JDBConnect {
 			disconnectPstmt();
 		}
 	}
-	
-	//ordermenu_id로 메뉴의 이름과 가격을 가져오는 메서드
-	public synchronized ArrayList<String> getMenuInfo(int ordermenuId) throws SQLException{
+
+	// ordermenu_id로 메뉴의 이름과 가격을 가져오는 메서드
+	public synchronized ArrayList<String> getMenuInfo(int ordermenuId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
-			
+
 			query.append("Select m.menu_name, m.price FROM menu as m ");
 			query.append("INNER JOIN ordermenu as om ON m.menu_id = om.menu_id ");
 			query.append("AND om.id = ? ");
-			
+
 			pstmt = conn.prepareStatement(query.toString());
-			
+
 			pstmt.setInt(1, ordermenuId);
-			
+
 			rs = pstmt.executeQuery();
-			
+
 			int cnt = 0;
 			ArrayList<String> list = new ArrayList<String>();
-			while(rs.next()) {
+			while (rs.next()) {
 				list.add(rs.getString("menu_name"));
 				list.add(String.valueOf(rs.getInt("price")));
 				cnt++;
 			}
-			if(cnt > 0) {
+			if (cnt > 0) {
 				return list;
 			}
 			return null;
@@ -380,63 +383,61 @@ public class OrderDAO extends JDBConnect {
 			disconnectPstmt();
 		}
 	}
-	
-	//orderoption_id로 메뉴의 이름과 가격을 가져오는 메서드
-		public synchronized ArrayList<String> getOptionInfo(int orderoptionId) throws SQLException{
-			try {
-				conn = dbConn.getConn();
-				query = new StringBuffer();
-				
-				query.append("Select mo.option_name, mo.price FROM menuoption as mo ");
-				query.append("INNER JOIN orderoption as oo ON mo.id = oo.option_id ");
-				query.append("AND oo.id = ? ");
-				
-				pstmt = conn.prepareStatement(query.toString());
-				
-				pstmt.setInt(1, orderoptionId);
-				
-				rs = pstmt.executeQuery();
-				
-				int cnt = 0;
-				ArrayList<String> list = new ArrayList<String>();
-				while(rs.next()) {
-					list.add(rs.getString("option_name"));
-					list.add(String.valueOf(rs.getInt("price")));
-					cnt++;
-				}
-				if(cnt > 0) {
-					return list;
-				}
-				
-				return null;
-			} catch (Exception e) {
-				// TODO: handle exception
-				System.out.println("orderoption_id로 옵션이름 가져오기 오류 " + e.getMessage());
-				return null;
-			} finally {
-				disconnectPstmt();
-			}
-		}
-	
-	//ordermenu 제거
-	public synchronized boolean delOrdermenu(int ordermenuId, String userId) throws SQLException{
+
+	// orderoption_id로 메뉴의 이름과 가격을 가져오는 메서드
+	public synchronized ArrayList<String> getOptionInfo(int orderoptionId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
-			
+
+			query.append("Select mo.option_name, mo.price FROM menuoption as mo ");
+			query.append("INNER JOIN orderoption as oo ON mo.id = oo.option_id ");
+			query.append("AND oo.id = ? ");
+
+			pstmt = conn.prepareStatement(query.toString());
+
+			pstmt.setInt(1, orderoptionId);
+
+			rs = pstmt.executeQuery();
+
+			int cnt = 0;
+			ArrayList<String> list = new ArrayList<String>();
+			while (rs.next()) {
+				list.add(rs.getString("option_name"));
+				list.add(String.valueOf(rs.getInt("price")));
+				cnt++;
+			}
+			if (cnt > 0) {
+				return list;
+			}
+
+			return null;
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("orderoption_id로 옵션이름 가져오기 오류 " + e.getMessage());
+			return null;
+		} finally {
+			disconnectPstmt();
+		}
+	}
+
+	// ordermenu 제거
+	public synchronized boolean delOrdermenu(int ordermenuId, String userId) throws SQLException {
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+
 			query.append("DELETE om FROM ordermenu as om ");
 			query.append("INNER JOIN orderlist as ol ");
 			query.append("ON ol.orderlist_id = om.orderlist_id ");
 			query.append("AND (ol.user_id = ? AND om.id = ?) ");
-			
+
 			pstmt = conn.prepareStatement(query.toString());
-			
+
 			pstmt.setString(1, userId);
 			pstmt.setInt(2, ordermenuId);
-			
-			
-			
-			if(pstmt.executeUpdate() == 0) {
+
+			if (pstmt.executeUpdate() == 0) {
 				updateOrderlist(userId);
 				return false;
 			}
@@ -450,8 +451,8 @@ public class OrderDAO extends JDBConnect {
 			disconnectPstmt();
 		}
 	}
-	
-	//orderoption 제거
+
+	// orderoption 제거
 	public synchronized boolean delOrderoption(int orderoptionId, String userId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
@@ -484,48 +485,88 @@ public class OrderDAO extends JDBConnect {
 			disconnectPstmt();
 		}
 	}
-	
-	//orderlist 계산하기
-		public synchronized boolean updateOrderlist(String userId) throws SQLException {
-			try {
-				conn = dbConn.getConn();
-				pstmt = conn.prepareStatement(userId);
-				query = new StringBuffer();
-				query.append(" update orderlist as ol1 set ");
-				query.append(" price = ( ");
-				query.append(" select sum1 from(");
-				query.append(" select ifnull(sum(oo.price),0) as sum1 from (");
-				query.append(
-						" select om.id  from orderlist as ol left join ordermenu as om on ol.orderlist_id = om.orderlist_id and (ol.user_id=? and status = '0')"); // 유저아이디
-																																									// 입력
-				query.append(" )as A inner join orderoption as oo on A.id = oo.ordermenu_id");
-				query.append(" )as D");
-				query.append(" )+(");
-				query.append(
-						" select sum2 from (select sum(om.price) as sum2 from orderlist as ol inner join ordermenu as om on ol.orderlist_id = om.orderlist_id) as B");
-				query.append(" )");
-				query.append(" where ol1.orderlist_id  = (");
-				query.append(" select idid from (");
-				query.append(
-						" select distinct ol3.orderlist_id as idid from orderlist as ol3 where user_id = ? and status = 0"); // 유저아이디
-																																// 입력
-				query.append(" ) as C");
-				query.append(" );");
-				pstmt = conn.prepareStatement(query.toString());
-				pstmt.setString(1, userId);
-				pstmt.setString(2, userId);
-				
-				if(pstmt.executeUpdate() > 0) {
-					return true;
-				}
-				return false;
-			} catch (Exception e) {
-				// TODO: handle exception
-				e.printStackTrace();
-				System.out.println("orderlist 계산 오류 " + e.getMessage());
-				return false;
-			} finally {
-				disconnectPstmt();
+
+	// orderlist 계산하기
+	public synchronized boolean updateOrderlist(String userId) throws SQLException {
+		try {
+			conn = dbConn.getConn();
+			pstmt = conn.prepareStatement(userId);
+			query = new StringBuffer();
+			query.append(" update orderlist as ol1 set ");
+			query.append(" price = ( ");
+			query.append(" select sum1 from(");
+			query.append(" select ifnull(sum(oo.price),0) as sum1 from (");
+			query.append(
+					" select om.id  from orderlist as ol left join ordermenu as om on ol.orderlist_id = om.orderlist_id and (ol.user_id=? and status = '0')"); // 유저아이디
+																																								// 입력
+			query.append(" )as A inner join orderoption as oo on A.id = oo.ordermenu_id");
+			query.append(" )as D");
+			query.append(" )+(");
+			query.append(
+					" select sum2 from (select sum(om.price) as sum2 from orderlist as ol inner join ordermenu as om on ol.orderlist_id = om.orderlist_id) as B");
+			query.append(" )");
+			query.append(" where ol1.orderlist_id  = (");
+			query.append(" select idid from (");
+			query.append(
+					" select distinct ol3.orderlist_id as idid from orderlist as ol3 where user_id = ? and status = 0"); // 유저아이디
+																															// 입력
+			query.append(" ) as C");
+			query.append(" );");
+			pstmt = conn.prepareStatement(query.toString());
+			pstmt.setString(1, userId);
+			pstmt.setString(2, userId);
+
+			if (pstmt.executeUpdate() > 0) {
+				return true;
 			}
+			return false;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.out.println("orderlist 계산 오류 " + e.getMessage());
+			return false;
+		} finally {
+			disconnectPstmt();
 		}
+	}
+
+	
+	//orderlist의 status를 변경하는 메서드
+	public synchronized boolean setState(String userId, int status) throws SQLException{
+		try {
+			conn = dbConn.getConn();
+			StringBuffer query = new StringBuffer();
+			query.append("update orderlist set ");
+			query.append("status = ?, "); //status
+			query.append("orderdate = ? "); //날짜
+			query.append("where userId = ? "); //userId
+			
+			pstmt = conn.prepareStatement(query.toString());
+			pstmt.setString(1, userId);
+			
+			// 타임스탬프
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Calendar cal = Calendar.getInstance();
+			String today = null;
+			today = formatter.format(cal.getTime());
+			Timestamp ts = Timestamp.valueOf(today);
+			pstmt.setTimestamp(2, ts);
+			pstmt.setInt(3, status);
+			
+			if(pstmt.executeUpdate() == 0) {
+				return false;
+			}
+			return true;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.out.println("orderlist의 status 변경 오류 " + e.getMessage());
+			return false;
+		} finally {
+			disconnectPstmt();
+		}
+	}
+	
+	//우리 가게에 들어온 수락되지 않은 주문 현황을 LinkedHashMap으로 가져오는 메서드 - 들어온 시간이 오래된 순으로 정렬
+	
 }

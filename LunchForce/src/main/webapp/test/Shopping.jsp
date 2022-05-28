@@ -32,6 +32,7 @@
 <%
 	if(list == null){
 		out.print("리스트는 널이야");
+		orderDTO.setPrice(0);
 	}
 	if(list != null){
 		out.print("리스트는널이 아니야");

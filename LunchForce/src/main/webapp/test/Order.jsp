@@ -24,10 +24,8 @@ if(optionPrice != null){
 	for (int i = 0; i < optionPrice.length; i++) {
 		optionId[i] = Integer.parseInt(optionPrice[i]);
 	}
-	if (orderDAO.addShopping(memberDTO.getId(), storeDTO.getStoreId(), menuDTO.getMenuId(), optionId)) {
+	orderDAO.addShopping(memberDTO.getId(), storeDTO.getStoreId(), menuDTO.getMenuId(), optionId);
 		//장바구니에 메뉴와 옵션 추가
-		response.sendRedirect("Menu.jsp?menuId=" + menuDTO.getMenuId());
-	}
 }
 if (orderDAO.addShopping(memberDTO.getId(), storeDTO.getStoreId(), menuDTO.getMenuId(), new int[0])) {
 	//장바구니에 메뉴와 옵션 추가
