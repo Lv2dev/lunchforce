@@ -27,7 +27,7 @@
 	if(storeDAO.editStoreInfo(storeDTO)){
 		int storeId = sdto.getStoreId();
 		String userId = memDTO.getId();
-		session.setAttribute("storeDTO", storeDAO.getStoreInfo(storeId, userId));
+		session.setAttribute("storeDTO", storeDAO.getStoreInfo(storeId));
 		response.sendRedirect("StoreView.jsp?storeId=" + sdto.getStoreId());
 	}else{
 		response.sendRedirect("StoreMain.jsp");

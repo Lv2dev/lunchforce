@@ -121,13 +121,15 @@ public class StoreDAO extends JDBConnect {
 	public synchronized StoreDTO getStoreInfo(int storeId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
-			stmt = conn.createStatement();
+
 			query = new StringBuffer();
 
 			query.append("SELECT * FROM store ");
-			query.append("WHERE store_id = " + storeId);
+			query.append("WHERE store_id = ?");
 
-			rs = stmt.executeQuery(query.toString());
+			pstmt = conn.prepareStatement(query.toString());
+			pstmt.setInt(1, storeId);
+			rs = pstmt.executeQuery();
 
 			StoreDTO storeDTO = new StoreDTO();
 
@@ -241,18 +243,22 @@ public class StoreDAO extends JDBConnect {
 	}
 
 	// 가게명 검색해서 검색결과 List으로 가져오기 - 키워드, 위도, 경도, 반경
-	public synchronized ArrayList<StoreDTO> getSearchList(String keyword, double x, double y, int distance) throws SQLException {
+	public synchronized ArrayList<StoreDTO> getSearchList(String keyword, double x, double y, int distance)
+			throws SQLException {
 		ArrayList<StoreDTO> list = new ArrayList<StoreDTO>();
 		try {
 			conn = dbConn.getConn();
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 			query.append(" select distinct store.store_id, store.store_name,");
-			query.append(" st_distance_sphere(point("+x+", "+y+"), point(store.address_x, store.address_y)) as distance");
+			query.append(" st_distance_sphere(point(" + x + ", " + y
+					+ "), point(store.address_x, store.address_y)) as distance");
 			query.append(" from store join menu");
-			query.append(" on store.store_id = menu.store_id and ((store.store_name like '%"+keyword+"%' or menu.menu_name like '%"+keyword+"%') and");
-			query.append(" st_distance_sphere(point("+x+", "+y+"), point(store.address_x, store.address_y)))<" + (distance*1000));
-			query.append(" order by distance;"); //반경순 정렬
+			query.append(" on store.store_id = menu.store_id and ((store.store_name like '%" + keyword
+					+ "%' or menu.menu_name like '%" + keyword + "%') and");
+			query.append(" st_distance_sphere(point(" + x + ", " + y + "), point(store.address_x, store.address_y)))<"
+					+ (distance * 1000));
+			query.append(" order by distance;"); // 반경순 정렬
 			rs = stmt.executeQuery(query.toString());
 			int cnt = 0;
 			while (rs.next()) {
@@ -272,6 +278,117 @@ public class StoreDAO extends JDBConnect {
 			return null;
 		} finally {
 			disconnectStmt();
+		}
+	}
+
+	// 가게명 검색해서 검색결과 List으로 가져오기 - 키워드만
+	public synchronized ArrayList<StoreDTO> getSearchList(String keyword) throws SQLException {
+		ArrayList<StoreDTO> list = new ArrayList<StoreDTO>();
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+			query.append("select distinct store.store_id, store.store_name, store.thumb ");
+			query.append("from store join menu ");
+			query.append("on store.store_id = menu.store_id and ");
+			query.append("(store.store_name like ? or menu.menu_name like ?) order by store_name");
+
+			pstmt = conn.prepareStatement(query.toString());
+			pstmt.setString(1, "%" + keyword + "%");
+			pstmt.setString(2, "%" + keyword + "%");
+
+			rs = pstmt.executeQuery(query.toString());
+			int cnt = 0;
+			while (rs.next()) {
+				cnt++;
+				StoreDTO dto = new StoreDTO();
+				dto.setStoreId(rs.getInt("store_id"));
+				dto.setStoreName(rs.getString("store_name"));
+				dto.setThumb(rs.getString("thumb"));
+				list.add(dto);
+			}
+			if (cnt == 0) {
+				return list;
+			}
+			return list;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return null;
+		} finally {
+			disconnectPstmt();
+		}
+	}
+	
+	//전체 검색 결과의 갯수를 리턴하는 메서드
+	public synchronized int getSearchCount(String keyword) throws SQLException {
+		ArrayList<StoreDTO> list = new ArrayList<StoreDTO>();
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+			query.append("select distinct store.store_id, store.store_name, store.thumb ");
+			query.append("from store inner join menu ");
+			query.append("on store.store_id = menu.store_id and ");
+			query.append("(store.store_name like '%" + keyword + "%' or menu.menu_name like '%" + keyword + "%') order by store_name");
+
+			pstmt = conn.prepareStatement(query.toString());
+
+			rs = pstmt.executeQuery();
+			int cnt = 0;
+			while (rs.next()) {
+				cnt++;
+			}
+			return cnt;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.out.println("검색결과의 갯수를 리턴하는 메서드 오류 " + e.getMessage());
+			return 0;
+		} finally {
+			disconnectPstmt();
+		}
+	}
+
+	// 가게명 검색해서 검색결과 페이징 해서 List로 가져오기
+	// keyword : 검색어
+	public synchronized ArrayList<StoreDTO> getSearchList(String keyword, int page, int pageCount) throws SQLException {
+		ArrayList<StoreDTO> list = new ArrayList<StoreDTO>();
+		try {
+			conn = dbConn.getConn();
+			
+			query = new StringBuffer();
+			query.append("select * from ( ");
+			query.append("select distinct st.store_id, st.store_name, st.thumb, row_number() over(order by store_name) as num ");
+			query.append("from store as st inner join menu as m  ");
+			query.append("on st.store_id = m.store_id and ");
+			query.append("(st.store_name like '%"+keyword+"%' or m.menu_name like '%"+keyword+"%') group by st.store_id order by store_name limit ? ) as temp ");
+			query.append("where num > ? order by num ");
+
+			pstmt = conn.prepareStatement(query.toString());
+			
+			pstmt.setInt(1, pageCount);
+			pstmt.setInt(2, (page - 1) * pageCount);
+			
+
+			rs = pstmt.executeQuery();
+			int cnt = 0;
+			while (rs.next()) {
+				cnt++;
+				StoreDTO dto = new StoreDTO();
+				dto.setStoreId(rs.getInt("store_id"));
+				dto.setStoreName(rs.getString("store_name"));
+				dto.setThumb(rs.getString("thumb"));
+				list.add(dto);
+			}
+			if (cnt == 0) {
+				return list;
+			}
+			return list;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return null;
+		} finally {
+			disconnectPstmt();
 		}
 	}
 
@@ -339,8 +456,8 @@ public class StoreDAO extends JDBConnect {
 			disconnectStmt();
 		}
 	}
-	
-	//가게의 현재 상태 가져오기
+
+	// 가게의 현재 상태 가져오기
 	public synchronized int getState(int storeId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
@@ -349,7 +466,7 @@ public class StoreDAO extends JDBConnect {
 
 			query.append("SELECT * FROM store ");
 			query.append("WHERE store_id = " + storeId);
-			
+
 			rs = stmt.executeQuery(query.toString());
 
 			int cnt = 0;
@@ -374,7 +491,7 @@ public class StoreDAO extends JDBConnect {
 		}
 	}
 
-	//가게 오픈하기
+	// 가게 오픈하기
 	public synchronized void setOpen(int storeId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
@@ -393,8 +510,8 @@ public class StoreDAO extends JDBConnect {
 			disconnectPstmt();
 		}
 	}
-	
-	//가게닫기
+
+	// 가게닫기
 	public synchronized void setClose(int storeId) throws SQLException {
 		try {
 			conn = dbConn.getConn();

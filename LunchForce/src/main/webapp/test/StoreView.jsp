@@ -60,6 +60,7 @@
 <a href="DeleteStore.jsp?">가게삭제</a><br> 
 <a href="EditStore.jsp">가게수정</a><br> 
 <a href="NewMenu.jsp">메뉴추가</a><br>
+<a href="StoreOrderList.jsp">주문현황 보기</a>
 <a href="EditMenuNumber.jsp">메뉴순서변경</a><br>
 <%
 	

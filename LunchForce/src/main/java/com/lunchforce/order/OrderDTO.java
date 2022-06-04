@@ -1,15 +1,17 @@
 package com.lunchforce.order;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class OrderDTO {
 	private int orderlistId;
 	private String userId;
 	private int storeId;
-	private Date orderDate;
+	private Timestamp orderDate;
 	private int price;
 	private int status;
 	private int time;
+	private String storeName;
 	
 	
 	public int getOrderlistId() {
@@ -30,10 +32,11 @@ public class OrderDTO {
 	public void setStoreId(int storeId) {
 		this.storeId = storeId;
 	}
-	public Date getOrderDate() {
+	
+	public Timestamp getOrderDate() {
 		return orderDate;
 	}
-	public void setOrderDate(Date orderDate) {
+	public void setOrderDate(Timestamp orderDate) {
 		this.orderDate = orderDate;
 	}
 	public int getPrice() {
@@ -54,4 +57,11 @@ public class OrderDTO {
 	public void setTime(int time) {
 		this.time = time;
 	}
+	public String getStoreName() {
+		return storeName;
+	}
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
+	}
+	
 }

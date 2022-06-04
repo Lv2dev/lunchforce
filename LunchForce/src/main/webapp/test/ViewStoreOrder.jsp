@@ -8,26 +8,12 @@
 <%@page import="java.util.ArrayList"%>
 <%request.setCharacterEncoding("UTF-8");%>
 <%
-	//1. a태그로 해서 클릭하면 삭제되고 이 페이지를 새로고침
-	//2. 메뉴 아래에 옵션하나 즉 ordermenu -> orderoption
-	//3. LinkedHashMap으로 ordermenu_id, menu_id와 option_id 가져와서 옆에 가격 붙이기
-	//4. 마지막에 합계 가격 출력
-	
-	//1. 2차원 ArrayList 가져오기
-	
+	//주문의 세부정보 출력
 	OrderDAO orderDAO = OrderDAO.getInstance();
-	StoreDAO storeDAO = StoreDAO.getInstance();
-	MenuOptionDAO moDAO = MenuOptionDAO.getInstance();
-	
-	MenuDAO menuDAO = MenuDAO.getInstance();
-	
-	MemberDTO memberDTO = (MemberDTO)session.getAttribute("memberDTO");
-	String userId = memberDTO.getId();
-	int status = 0;
-	
-	ArrayList<ArrayList<Integer>> list = orderDAO.getOrderList(userId, status);
-	OrderDTO orderDTO = orderDAO.getOrder(userId, 0);
-	
+
+	StoreDTO storeDTO = (StoreDTO)session.getAttribute("storeDTO");
+	int orderlistId = Integer.parseInt(request.getParameter("orderlistId"));
+	OrderDTO orderDTO = orderDAO.getStoreOrderDTO(storeDTO.getStoreId(), 1, orderlistId); 
 	session.setAttribute("orderDTO", orderDTO);
 	
 	String price = "0";
@@ -35,20 +21,18 @@
 		price = String.valueOf(orderDTO.getPrice());
 	}
 	
-%>
-<%
+	//주문의 상세정보 출력
+	ArrayList<ArrayList<Integer>> list = orderDAO.getStoreOrderList(storeDTO.getStoreId(), 1, orderlistId);
+	
 	if(list == null){
-		out.print("리스트는 널이야");
+		out.print("리스트는 널이야(오류)");
 	}
 	if(list != null){
 		out.print("리스트는널이 아니야");
 		for(int i = 0; i < list.size(); i++){
 			ArrayList<String> menuList = orderDAO.getMenuInfo(list.get(i).get(0));
 			%>
-				메뉴명 : <br>
-				<a href = 'DelMenu.jsp?ordermenuId=<%= list.get(i).get(0) %>'>
-					<%= menuList.get(0) %>
-				</a>
+				메뉴명 : <%= menuList.get(0) %><br>
 				가격 : <%= menuList.get(1) %>
 				<br>
 			<%
@@ -58,18 +42,21 @@
 				for(int j = 1; j < size; j++){
 					ArrayList<String> optionList = orderDAO.getOptionInfo(list.get(i).get(j));
 					%>
-					옵션명 : <br>
-					<a href = 'DelOption.jsp?orderoptionId=<%= list.get(i).get(j) %>'>
-						<%= optionList.get(0) %>
-					</a>
+					옵션명 : <%= optionList.get(0) %><br>
 					가격 : <%= optionList.get(1) %>
-					<br>
+					<br><br>
 					<%
 				}
 			}
 		}
 	}
+	
+	//총액 출력 후 수락, 거절 페이지로 이동하는 앵커 태그 추가
+	session.setAttribute("orderDTO", orderDTO);
 %>
-<br>
-총 <%= price %> 원 <br>
-<a href="TryOrder.jsp">주문하기</a>
+총 <%= price %> 원<br><br>
+<form action="StoreOrderOK.jsp?">
+	<input type="text" name="time">분 후에 준비돼요<br>
+	<input type="submit" value="주문수락!">
+</form>
+<a href="StoreOrderIgnore.jsp">주문거절</a><br>

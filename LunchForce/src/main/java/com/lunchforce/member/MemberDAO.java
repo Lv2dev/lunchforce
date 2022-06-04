@@ -36,14 +36,14 @@ public class MemberDAO extends JDBConnect{
 	// method
 
 	// 아이디 중복 체크, 중복없음 true, 중복있음 false;
-	public synchronized boolean idCheck(MemberDTO memberDTO) throws SQLException {
+	public synchronized boolean idCheck(String memberId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			stmt = conn.createStatement();
 			query = new StringBuffer();
 
 			query.append("SELECT id FROM USER ");
-			query.append("WHERE id = '" + memberDTO.getId() + "'");
+			query.append("WHERE id = '" + memberId + "'");
 
 			rs = stmt.executeQuery(query.toString());
 
@@ -71,7 +71,7 @@ public class MemberDAO extends JDBConnect{
 		try {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
-			query.append("INSERT INTO user ");
+			query.append("INSERT INTO user(id, pw, name, nickname, tel, email, bday, jday, type, gender, question, answer) ");
 			query.append("VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -92,6 +92,8 @@ public class MemberDAO extends JDBConnect{
 			pstmt.setTimestamp(8, ts);
 			pstmt.setInt(9, memberDTO.getType());
 			pstmt.setInt(10, memberDTO.getGender());
+			pstmt.setString(11, memberDTO.getQuestion());
+			pstmt.setString(12, memberDTO.getAnswer());
 
 			if (pstmt.executeUpdate() != 1) {
 				return false;
@@ -391,4 +393,6 @@ public class MemberDAO extends JDBConnect{
 			disconnectStmt();
 		}
 	}
+	
+	
 }
