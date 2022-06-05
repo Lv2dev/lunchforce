@@ -849,8 +849,8 @@ public class OrderDAO extends JDBConnect {
 			query.append("select * from ( ");
 			query.append("select ol.orderlist_id, ol.user_id, ol.store_id, ol.order_date, ol.price, ol.status, ol.time, st.store_name ,row_number() over(order by store_name) as num ");
 			query.append("from orderlist as ol inner join store as st on ol.store_id = st.store_id "); 
-			query.append("where ol.user_id = ? AND ol.status > 0 order by order_date) as temp "); //userId
-			query.append("where num > ? limit ? "); //(page - 1) * pageCount, pageCount
+			query.append("AND (ol.user_id = ? AND ol.status > 0) order by order_date) as temp "); //userId
+			query.append("where temp.num > ? order by temp.num limit ? "); //(page - 1) * pageCount, pageCount
 			
 			pstmt = conn.prepareStatement(query.toString());
 			
@@ -871,6 +871,7 @@ public class OrderDAO extends JDBConnect {
 				dto.setStatus(rs.getInt("status"));
 				dto.setTime(rs.getInt("time"));
 				dto.setStoreName(rs.getString("store_name"));
+				list.add(dto);
 			}
 			
 			return list;

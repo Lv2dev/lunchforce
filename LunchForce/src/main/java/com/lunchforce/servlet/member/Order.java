@@ -53,12 +53,6 @@ public class Order extends HttpServlet {
 			page = Integer.parseInt(request.getParameter("page"));
 		}
 
-		// 넘어온 keyword를 저장
-		String keyword = "";
-		if (request.getParameter("keyword") != null) {
-			keyword = request.getParameter("keyword");
-		}
-
 		int pageCount = 10; // 한 페이지에 표시되는 주문내역의 수
 
 		ArrayList<OrderDTO> list = new ArrayList<OrderDTO>();
@@ -67,10 +61,11 @@ public class Order extends HttpServlet {
 			int resultCount = orderDAO.getOrderCount(memberDTO.getId());
 
 			// 2. 현재 페이지에 해당하는 주문 목록을 가져옴
-			list = orderDAO.getPagingOrderlist(keyword, page, pageCount);
+			list = orderDAO.getPagingOrderlist(memberDTO.getId(), page, pageCount);
 
 			// 3. request에 넣어줌
 			int pages = (int) Math.ceil((double) resultCount / 10);
+			
 			int end = (int) (Math.ceil((double) page / 10) * 10);
 			if (end > pages) {
 				end = pages;

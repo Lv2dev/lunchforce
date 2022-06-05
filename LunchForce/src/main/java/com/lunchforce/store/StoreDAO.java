@@ -162,7 +162,7 @@ public class StoreDAO extends JDBConnect {
 			System.out.println("storeDAO_가게정보한번에가져오기ERROR");
 			return null;
 		} finally {
-			disconnectStmt();
+			disconnectPstmt();
 		}
 	}
 

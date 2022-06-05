@@ -21,6 +21,10 @@ request.setCharacterEncoding("UTF-8");
 	crossorigin="anonymous"></script>
 <meta name="theme-color" content="#7952b3">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@1.0/nanumsquare.css">
+<style>
+	body { font-family: 나눔스퀘어, 'NanumSquare', sans-serif; }
+</style>
 <style>
 .box {
 	position: relative;
@@ -129,44 +133,50 @@ request.setCharacterEncoding("UTF-8");
 				</div>
 			</div>
 		</section>
-		<div class=" pb-5 mb-5 row justify-content-center col-lg-8 col-md-12">
-			<form class="row justify-content-center container col-12" action="../member/Search">
-				<div class="col-8">
-					<input type="search" class="form-control h-3" style="height: 100%;"
-						placeholder="검색어 입력" aria-label="Search" name="keyword">
-				</div>
-				<div class="col-4">
-					<button class="w-100 btn btn-lg btn-outline-primary"
-						style="height: 100%;" type="submit">검색</button>
-				</div>
-			</form>
-		</div>
 		<div
 			class="px-md-0 px-lg-5 mt-5 mb-3 row justify-content-center container col-12">
-			<c:forEach items="${ searchList }" var="item">
-				<div class="col-10 col-md-10 mx-1 mb-2 container row justify-content-center shadow-lg rounded bg-body align-items-center" style="height:100%;"
-				 onclick="location.href='../member/Store?storeId=${item.storeId}'">
-				<img alt="가게이미지" src="${ item.thumb }" class="col-10 col-md-3">
-				<b class="col-7">${item.storeName }</b>
+			<div
+				class="col-10 col-md-10 mx-2 mb-5 container row justify-content-between bg-body align-items-center"
+				style="height: 100%;">
+				<!-- 가게 이미지 -->
+				<div
+				class="col-12 col-md-6  container row justify-content-center shadow-lg rounded-lg bg-body align-items-center"
+				style="height: 100%;">
+				<img alt="가게이미지" src="${ storeDTO.thumb }" class="col-12"
+					onclick="location.href='member/Store?storeId=${item.storeId}'">
 				</div>
-			</c:forEach>
-			<div class="col-12 col-md-7 mx-5 my-5 container row justify-content-center shadow-lg rounded bg-body">
-				<c:if test="${page > 10}">
-					<div class="col-1"><a href="../member/Search?page=${ page - 10 }">이전</a></div>
+				<!-- 가게 이름 및 상태 -->
+				<div
+				class="col-12 col-md-6  container row justify-content-left shadow-lg rounded-lg bg-body align-items-center "
+				style="height: 100%;">
+				<div class="col-12 mx-2 mb-0"><h1 style="font-weight: 800;">${storeDTO.storeName}</h1></div>
+				<c:if test="${ storeDTO.status == 0 }">
+				<div class="col-12 mx-2 mt-0"><h3 style="font-weight: 400;">오픈 준비중</h3></div>
 				</c:if>
-				<c:forEach var="i" begin ="${ start }" end="${ end }" step="1">
-				<c:if test="${ i == page }">
-					<div class="col-1"><b>${ page }</b></div>
-				</c:if>
-				<c:if test="${ i != page }">
-					<div class="col-1"><a href="../member/Search?page=${ i }">${ i }</a></div>
-				</c:if>
-				</c:forEach>
-				<c:if test="${ page < 10 && pages > 10 }">
-					<div class="col-1"><a href="../member/Search?page=${ end + 1 }">다음</a></div>
-				</c:if>
+				</div>
 			</div>
+			<!-- 공지사항 -->
+			<div
+				class="col-10 col-md-10 mx-2 mb-5 py-3 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center">
+				<h5 class="m-0" style="font-weight: 400">${ storeDTO.notice }</h5>
+			</div>
+			<!-- 메뉴목록 -->
+			<c:forEach items="${ menuList }" var="item">
+				<div
+				class="col-10 col-md-10 mx-1 mb-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center"
+				style="height: 70%;">
+				<div class="col-4 col-md-3 m-1">
+					<img alt="메뉴이미지" src="${ item.pic }">
+				</div>
+				<div class="col-6 col-md-7 m-1">
+					<h3>${ item.menuName }</h3><br>
+					<h5>${ item.price }</h5>
+				</div>
+			</div>
+			</c:forEach>
 		</div>
 	</main>
+	
+	
 </body>
 </html>

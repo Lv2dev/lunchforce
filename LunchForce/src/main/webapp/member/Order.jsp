@@ -101,7 +101,7 @@ request.setCharacterEncoding("UTF-8");
 						<li class="nav-item"><a class="nav-link active"
 							aria-current="page" href="#">점특추천</a></li>
 						<li class="nav-item"><a class="nav-link active"
-							aria-current="page" href="#">주소관리</a></li>
+							aria-current="page" href="../member/MyAddress">주소관리</a></li>
 						<c:if test="${login == 0 }">
 							<li class="nav-item mx-lg-3 mx-0 mt-1 mt-lg-0"><button
 									type="button" class="btn btn-primary"
@@ -144,40 +144,40 @@ request.setCharacterEncoding("UTF-8");
 		<div
 			class="px-md-0 px-lg-5 mt-5 mb-3 row justify-content-center container col-12">
 			<c:forEach items="${ orderList }" var="item">
-				<div class="col-10 col-md-10 mx-1 mb-2 container row justify-content-center shadow-lg rounded bg-body align-items-center" style="height:100%;">
-				<div onclick="href='../member/DetailOrder'" class="col-12 row justify-content-left">
+				<div class="col-10 col-md-10 mx-1 mb-2 container row justify-content-center shadow-lg rounded bg-body align-items-center" style="height:100%;"
+				onclick="location.href='../member/DetailOrder?orderlistId=${item.orderlistId}'">
+				<div  class="col-12 row justify-content-left">
 				주문일시 : ${ item.orderDate } <br>
 				상태 :
-				<c:if test="${ item.state == 1 }">
+				<c:if test="${ item.status == 1 }">
 					수락대기중
 				</c:if>
-				<c:if test="${ item.state == 2 }">
-					주문수락
+				<c:if test="${ item.status == 2 }">
+					주문수락<br>소요시간 : ${ item.time } 분
 				</c:if>
-				<c:if test="${ item.state == 2 }">
+				<c:if test="${ item.status == 3 }">
 					완료된 주문
 				</c:if>
 				<br>
 				총액 : ${item.price }<br>
-				<b>가게명 : ${item.storeName }</b>
+				가게명 : ${item.storeName }
 				</div>
-				<b class="col-7">${item.storeName }</b>
 				</div>
 			</c:forEach>
 			<div class="col-12 col-md-7 mx-5 my-5 container row justify-content-center shadow-lg rounded bg-body">
 				<c:if test="${page > 10}">
-					<div class="col-1"><a href="../member/Search?page=${ page - 10 }">이전</a></div>
+					<div class="col-1"><a href="../member/Order?page=${ page - 10 }">이전</a></div>
 				</c:if>
 				<c:forEach var="i" begin ="${ start }" end="${ end }" step="1">
 				<c:if test="${ i == page }">
 					<div class="col-1"><b>${ page }</b></div>
 				</c:if>
 				<c:if test="${ i != page }">
-					<div class="col-1"><a href="../member/Search?page=${ i }">${ i }</a></div>
+					<div class="col-1"><a href="../member/Order?page=${ i }">${ i }</a></div>
 				</c:if>
 				</c:forEach>
 				<c:if test="${ page < 10 && pages > 10 }">
-					<div class="col-1"><a href="../member/Search?page=${ end + 1 }">다음</a></div>
+					<div class="col-1"><a href="../member/Order?page=${ end + 1 }">다음</a></div>
 				</c:if>
 			</div>
 		</div>

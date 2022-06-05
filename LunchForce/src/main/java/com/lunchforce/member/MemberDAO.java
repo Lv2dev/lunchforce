@@ -330,18 +330,19 @@ public class MemberDAO extends JDBConnect{
 	}
 	
 	//주소추가
-	public synchronized boolean newAddress(MemberDTO mdto) throws SQLException {
+	public synchronized boolean newAddress(Double x, Double y, String address, String userId) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
 			query.append("update user set ");
-			query.append("address = ?, address_x = ?, address_y = ? where id = '" + mdto.getId() + "'");
+			query.append("address = ?, address_x = ?, address_y = ? where id = ?");
 
 			pstmt = conn.prepareStatement(query.toString());
 			
-			pstmt.setString(1, mdto.getAddress());
-			pstmt.setDouble(2, mdto.getAddressX());
-			pstmt.setDouble(3, mdto.getAddressY());
+			pstmt.setString(1, address);
+			pstmt.setDouble(2, x);
+			pstmt.setDouble(3, y);
+			pstmt.setString(4, userId);
 			
 
 			if (pstmt.executeUpdate() != 1) {
@@ -351,7 +352,7 @@ public class MemberDAO extends JDBConnect{
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
-			System.out.println("주소추가에러");
+			System.out.println("주소추가에러 " + e.getMessage());
 			return false;
 		} finally {
 			disconnectPstmt();
@@ -394,5 +395,35 @@ public class MemberDAO extends JDBConnect{
 		}
 	}
 	
-	
+	//주소가 추가되어 있는지 확인하는 메서드
+	public synchronized boolean isAddressAdded(String userId) throws SQLException{
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+			
+			query.append("select * from user where address is not null AND id = ?");//userId
+			
+			pstmt = conn.prepareStatement(query.toString());
+			pstmt.setString(1, userId);
+			rs = pstmt.executeQuery();
+			
+			int cnt = 0;
+			while(rs.next()) {
+				cnt++;
+			}
+			
+			if(cnt == 0) { //address컬럼이 null이면
+				return false;
+			}
+			return true;
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.out.println("주소가 추가되어 있는지 확인하는 메서드 isAddressAdded() 오류 " + e.getMessage());
+			return false;
+		} finally {
+			disconnectPstmt();
+		}
+	}
 }

@@ -101,7 +101,7 @@ request.setCharacterEncoding("UTF-8");
 						<li class="nav-item"><a class="nav-link active"
 							aria-current="page" href="#">점특추천</a></li>
 						<li class="nav-item"><a class="nav-link active"
-							aria-current="page" href="#">주소관리</a></li>
+							aria-current="page" href="../member/MyAddress">주소관리</a></li>
 						<c:if test="${login == 0 }">
 							<li class="nav-item mx-lg-3 mx-0 mt-1 mt-lg-0"><button
 									type="button" class="btn btn-primary"
