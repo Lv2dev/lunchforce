@@ -326,7 +326,7 @@ public class StoreDAO extends JDBConnect {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
 			query.append("select distinct store.store_id, store.store_name, store.thumb ");
-			query.append("from store inner join menu ");
+			query.append("from store left join menu ");
 			query.append("on store.store_id = menu.store_id and ");
 			query.append("(store.store_name like '%" + keyword + "%' or menu.menu_name like '%" + keyword + "%') order by store_name");
 
@@ -358,7 +358,7 @@ public class StoreDAO extends JDBConnect {
 			query = new StringBuffer();
 			query.append("select * from ( ");
 			query.append("select distinct st.store_id, st.store_name, st.thumb, row_number() over(order by store_name) as num ");
-			query.append("from store as st inner join menu as m  ");
+			query.append("from store as st left join menu as m  ");
 			query.append("on st.store_id = m.store_id and ");
 			query.append("(st.store_name like '%"+keyword+"%' or m.menu_name like '%"+keyword+"%') group by st.store_id order by store_name limit ? ) as temp ");
 			query.append("where num > ? order by num ");
@@ -438,7 +438,7 @@ public class StoreDAO extends JDBConnect {
 			while (rs.next()) {
 				sDTO.setStoreId(rs.getInt("store_id"));
 				sDTO.setAddressX(rs.getDouble("address_x"));
-				sDTO.setAddressX(rs.getDouble("address_y"));
+				sDTO.setAddressY(rs.getDouble("address_y"));
 				sDTO.setAddress(rs.getString("address"));
 				cnt++;
 			}

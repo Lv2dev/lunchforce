@@ -26,9 +26,8 @@ if(optionPrice != null){
 	}
 	orderDAO.addShopping(memberDTO.getId(), storeDTO.getStoreId(), menuDTO.getMenuId(), optionId);
 		//장바구니에 메뉴와 옵션 추가
+}else{
+	orderDAO.addShopping(memberDTO.getId(), storeDTO.getStoreId(), menuDTO.getMenuId(), new int[0]);
 }
-if (orderDAO.addShopping(memberDTO.getId(), storeDTO.getStoreId(), menuDTO.getMenuId(), new int[0])) {
-	//장바구니에 메뉴와 옵션 추가
 	response.sendRedirect("Menu.jsp?menuId=" + menuDTO.getMenuId());
-}
 %>

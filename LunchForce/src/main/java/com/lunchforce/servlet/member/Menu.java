@@ -10,26 +10,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.eclipse.jdt.internal.compiler.ast.ArrayAllocationExpression;
-
 import com.lunchforce.member.MemberDTO;
 import com.lunchforce.store.MenuDAO;
 import com.lunchforce.store.MenuDTO;
+import com.lunchforce.store.MenuOptionDAO;
+import com.lunchforce.store.MenuOptionDTO;
 import com.lunchforce.store.StoreDAO;
 import com.lunchforce.store.StoreDTO;
 
 /**
- * Servlet implementation class Store
+ * 메뉴 페이지와 연결된 서블릿
  */
-@WebServlet("/member/Store")
-public class Store extends HttpServlet {
+@WebServlet("/member/Menu")
+public class Menu extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
 		HttpSession session = request.getSession();
 		
-		StoreDAO storeDAO = StoreDAO.getInstance();
+		MenuDAO menuDAO = MenuDAO.getInstance();
 
 		// 이미 로그인 된 상태면
 		// 일반회원: 탐색할 페이지로 보냄
@@ -46,42 +46,52 @@ public class Store extends HttpServlet {
 			}
 		}
 		
-		//1. 넘어온 가게 id를 가져옴
-		if(request.getParameter("storeId") == null) { //가게 아이디가 넘어오지 않은 경우
-			response.sendRedirect("../member/Main"); //메인 페이지로 이동
+		StoreDTO storeDTO = (StoreDTO)session.getAttribute("storeDTO");
+		
+		//1. 넘어온 메뉴id를 가져옴
+		if(request.getParameter("menuId") == null) { //넘어온 메뉴id가 없으면
+			response.sendRedirect("../member/Store?storeId=" + storeDTO.getStoreId());  //가게 페이지로 이동
 			return;
 		}
+		int menuId = Integer.parseInt(request.getParameter("menuId"));
 		
-		int storeId = Integer.parseInt(request.getParameter("storeId"));
 		try {
-			//2. 가게 정보를 가져옴
-			StoreDTO storeDTO = storeDAO.getStoreInfo(storeId);
-			if(storeDTO == null) {
-				//가게 정보를 가져오는 데 실패했으면 메인 페이지로 이동
-				response.sendRedirect("../member/Main");
+			//2. 메뉴의 정보를 가져옴
+			MenuDTO menuDTO = menuDAO.getMenuInfo(menuId);
+			
+			//3. 2가 실패한 경우 가게 화면으로 이동
+			if(menuDTO == null) {
+				response.sendRedirect("../member/Store?storeId=" + storeDTO.getStoreId());  //가게 페이지로 이동
 				return;
 			}
 			
-			//3. 넘어온 가게 정보를 request에 저장
-			request.setAttribute("storeDTO", storeDTO);
+			//4. 메뉴의 정보를 request에 저장
+			request.setAttribute("menuDTO", menuDTO);
 			
-			//4. 가게의 메뉴 리스트 가져오기
-			MenuDAO menuDAO = MenuDAO.getInstance(); //가게의 메뉴 리스트 가져오기위한 객체 
-			ArrayList<MenuDTO> list = new ArrayList<MenuDTO>(); //메뉴 리스트를 가져오기 위한 List
-			list = menuDAO.getMenuList(storeId); //메뉴 리스트를 가져옴
+			//5. 메뉴의 옵션 정보를 List로 가져오기
+			MenuOptionDAO moDAO = MenuOptionDAO.getInstance(); //옵션들을 가져오기 위한 객체
+			ArrayList<MenuOptionDTO> list = moDAO.getOptionList(menuId);
 			
-			//5. 가게의 메뉴 리스트를 request에 저장
-			request.setAttribute("menuList", list);
+			//6. request에 저장
+			request.setAttribute("optionList", list);
+			request.setAttribute("storeName", storeDTO.getStoreName());
 			
-			//6. 가게정보를 세션에 저장
-			session.setAttribute("storeDTO", storeDTO);
+			if(list == null) {
+				request.setAttribute("optionListSize", 0);
+			}else {
+				request.setAttribute("optionListSize", list.size()); //list의 크기
+			}
+			
+			//세션에 menuDTO 저장
+			session.setAttribute("menuDTO", menuDTO);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
 		
+		
 		//페이지 이동
-		request.getRequestDispatcher("../member/Store.jsp").forward(request, response);
+		request.getRequestDispatcher("../member/Menu.jsp").forward(request, response);
 		return;
 	}
 }

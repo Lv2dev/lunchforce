@@ -45,6 +45,13 @@ request.setCharacterEncoding("UTF-8");
 <meta name="theme-color" content="#7952b3">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://kit.fontawesome.com/487e80ebce.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@1.0/nanumsquare.css">
+<style>
+body {
+	font-family: 나눔스퀘어, 'NanumSquare', sans-serif;
+}
+</style>
 
 
 <style>

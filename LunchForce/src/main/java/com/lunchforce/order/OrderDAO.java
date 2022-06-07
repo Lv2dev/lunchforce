@@ -2,6 +2,8 @@ package com.lunchforce.order;
 
 import com.lunchforce.dbconnect.JDBConnect;
 import com.lunchforce.store.MenuDTO;
+import com.lunchforce.store.MenuOptionDAO;
+import com.lunchforce.store.MenuOptionDTO;
 import com.mysql.cj.jdbc.result.ResultSetMetaData;
 import java.util.*;
 import java.sql.*;
@@ -33,8 +35,9 @@ public class OrderDAO extends JDBConnect {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
 			// 장바구니가 이미 있는지 없는지 체크
-			query.append("SELECT orderlist_id from orderlist where user_id = '" + userId + "'");
+			query.append("SELECT orderlist_id from orderlist where user_id = ? AND status = 0");
 			pstmt = conn.prepareStatement(query.toString());
+			pstmt.setString(1, userId);
 			rs = pstmt.executeQuery();
 			int cnt1 = 0;
 			int orderId = 0;
@@ -46,8 +49,9 @@ public class OrderDAO extends JDBConnect {
 			if (cnt1 == 1) { // 장바구니가 이미 있으면
 				// 다른 가게인지 체크
 				query = new StringBuffer();
-				query.append("SELECT orderlist_id from orderlist where store_id = " + storeId);
+				query.append("SELECT orderlist_id from orderlist where store_id = ? and status = 0");
 				pstmt = conn.prepareStatement(query.toString());
+				pstmt.setInt(1, storeId);
 				rs = pstmt.executeQuery();
 				int cnt2 = 0;
 
@@ -62,7 +66,7 @@ public class OrderDAO extends JDBConnect {
 					query.append("DELETE FROM orderlist ");
 					query.append("WHERE orderlist_id= " + orderId);
 					pstmt = conn.prepareStatement(query.toString());
-					rs = pstmt.executeQuery();
+					pstmt.executeUpdate();
 					disconnectPstmt();
 					// 새로운 장바구니 추가
 					query = new StringBuffer();
@@ -128,18 +132,24 @@ public class OrderDAO extends JDBConnect {
 			}
 			// 2. orderoption 추가하기
 			if (optionId.length > 0) { // 들어온 옵션이 1개 이상이면 수행
-
+				
 				try {
+					query = new StringBuffer();
+					query.append("set @tempMenu = (select a.id from orderlist as ol inner join ( ");
+					query.append("select om.id as id, om.orderlist_id as orderlist_id, om.menu_id as menu_id from ordermenu as om left join orderoption as oo  ");
+					query.append("on om.id = oo.ordermenu_id where oo.id is null) as a ");
+					query.append("on ol.orderlist_id = a.orderlist_id and (ol.user_id = ? and ol.status = 0 and a.menu_id = ?) limit 1)");
+					
+					pstmt = conn.prepareStatement(query.toString());
+					pstmt.setString(1, userId);
+					pstmt.setInt(2, menuId);
+					pstmt.executeUpdate();
+					
+					query = new StringBuffer();
+					query.append("INSERT INTO orderoption (`ordermenu_id`,`option_id`,`option_name`,`price`) ");
+					query.append("VALUES ");
 					for (int i = 0; i < optionId.length; i++) {
-						query = new StringBuffer();
-						query.append("INSERT INTO orderoption (`ordermenu_id`,`option_id`,`option_name`,`price`) ");
-						query.append("VALUES((");
-						query.append("select a.id from orderlist as ol inner join ( ");
-						query.append(
-								"select om.id as id, om.orderlist_id as orderlist_id, om.menu_id as menu_id from ordermenu as om left join orderoption as oo  ");
-						query.append("on om.id = oo.ordermenu_id where oo.id is null) as a ");
-						query.append(
-								"on ol.orderlist_id = a.orderlist_id and (ol.user_id = ? and ol.status = 0 and a.menu_id = ?) limit 1), ");
+						query.append("((@tempMenu), ");
 						// userId, menuId
 						query.append(
 								"(select * from(select id from menuoption where id = ? and menu_id = ? limit 1) as b),");
@@ -148,20 +158,28 @@ public class OrderDAO extends JDBConnect {
 								"(select * from(select option_name from menuoption where id = ? and menu_id = ? limit 1) as c),");
 						// optionId[i], menuId
 						query.append(
-								"(select * from(select price from menuoption where id = ? and menu_id = ? limit 1) as d)); ");
+								"(select * from(select price from menuoption where id = ? and menu_id = ? limit 1) as d)) ");
 						// optionId[i], menuId
-						pstmt = conn.prepareStatement(query.toString());
-						pstmt.setString(1, userId);
-						pstmt.setInt(2, menuId);
-						pstmt.setInt(3, optionId[i]);
-						pstmt.setInt(4, menuId);
-						pstmt.setInt(5, optionId[i]);
-						pstmt.setInt(6, menuId);
-						pstmt.setInt(7, optionId[i]);
-						pstmt.setInt(8, menuId);
-						pstmt.executeUpdate();
-						pstmt.close();
+						if(optionId.length - 1 > i) {
+							query.append(" , ");
+						}
+						System.out.println("빙빙돌아가는 쿼리 " + i);
 					}
+					pstmt = conn.prepareStatement(query.toString());
+					int j = 0;
+					for (int i = 0; i < optionId.length; i++) {
+						System.out.println("빙빙돌아가는 pstmt " + i);
+						pstmt.setInt(j+1, optionId[i]);
+						pstmt.setInt(j+2, menuId);
+						pstmt.setInt(j+3, optionId[i]);
+						pstmt.setInt(j+4, menuId);
+						pstmt.setInt(j+5, optionId[i]);
+						pstmt.setInt(j+6, menuId);
+						
+						j += 6;
+					}
+					pstmt.executeUpdate();
+					pstmt.close();
 				} catch (Exception e) {
 					// TODO: handle exception
 					e.printStackTrace();
@@ -170,36 +188,8 @@ public class OrderDAO extends JDBConnect {
 			}
 			// 3. order 테이블의 값 수정하기(가격계산해서)
 			try {
-				query = new StringBuffer();
-				query.append(" update orderlist as ol1 set ");
-				query.append(" price = ( ");
-				query.append(" select sum1 from(");
-				query.append(" select ifnull(sum(oo.price),0) as sum1 from (");
-				query.append(
-						" select om.id  from orderlist as ol left join ordermenu as om on ol.orderlist_id = om.orderlist_id and (ol.user_id=? and status = '0')"); // 유저아이디
-																																									// 입력
-				query.append(" )as A inner join orderoption as oo on A.id = oo.ordermenu_id");
-				query.append(" )as D");
-				query.append(" )+(");
-				query.append(
-						" select sum2 from (select sum(om.price) as sum2 from orderlist as ol inner join ordermenu as om on ol.orderlist_id = om.orderlist_id) as B");
-				query.append(" )");
-				query.append(" where ol1.orderlist_id  = (");
-				query.append(" select idid from (");
-				query.append(
-						" select distinct ol3.orderlist_id as idid from orderlist as ol3 where user_id = ? and status = 0"); // 유저아이디
-																																// 입력
-				query.append(" ) as C");
-				query.append(" );");
-				pstmt = conn.prepareStatement(query.toString());
-				pstmt.setString(1, userId);
-				pstmt.setString(2, userId);
-				if (pstmt.executeUpdate() > 0) {
-					return true;
-				} else {
-					return false;
-				}
-
+				updateOrderlist(userId);
+				return true;
 			} catch (Exception e) {
 				System.out.println("3. order 테이블의 값 수정하기(가격계산해서)" + e.getMessage());
 				return false;
@@ -259,86 +249,85 @@ public class OrderDAO extends JDBConnect {
 	// 장바구니 내용을 가져오는 2차원 ArrayList
 	// index 0 : ordermenu.id
 	// index 1~ : orderoption.id
-	public synchronized ArrayList<ArrayList<Integer>> getOrderList(String userId, int status) throws SQLException {
+	public synchronized ArrayList<ArrayList<Object>> getOrderList(String userId, int status) throws SQLException {
 		try {
 			conn = dbConn.getConn();
 			query = new StringBuffer();
 
 			// rs.next() 해서 menu_id가 다른게 나올 때까지 해당하는 key값에 arrayList안에 option_id들을 밀어넣음
-			query.append("Select om.id as ordermenu_id, oo.id as orderoption_id ");
-			query.append("FROM orderlist as ol INNER JOIN ordermenu as om ON ol.orderlist_id = om.orderlist_id ");
-			query.append("AND (ol.user_id = ? AND ol.status = ?) ");
-			query.append("LEFT JOIN orderoption as oo ON om.id = oo.ordermenu_id ");
-			query.append("");
+			query.append("select temp1.menu_name as menu_name, temp1.menu_id as menu_id, temp1.menu_price as menu_price, temp2.option_name as option_name, temp2.option_id as option_id, temp2.option_price as option_price ");
+			query.append("from ( ");
+			query.append("select omm.ordermenu_id, m.menu_id, m.menu_name, m.price as menu_price from menu as m inner join (select om.id as ordermenu_id, om.menu_id from orderlist as ol inner join ordermenu as om on ol.orderlist_id = om.orderlist_id where ol.user_id = 'ilban' and ol.status = 0) as omm on m.menu_id = omm.menu_id ");
+			query.append(") as temp1 ");
+			query.append("left join (select o.price as option_price, o.option_name as option_name, o.id as option_id, oo.ordermenu_id as ordermenu_id from menuoption as o inner join orderoption as oo on o.id = oo.option_id) as temp2 ");
+			query.append("on temp1.ordermenu_id = temp2.ordermenu_id ");
 			// userId, status
 			pstmt = conn.prepareStatement(query.toString());
 
 			pstmt.setString(1, userId);
 			pstmt.setInt(2, status);
 
-			ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
+			ArrayList<ArrayList<Object>> list = new ArrayList<ArrayList<Object>>();
 			rs = pstmt.executeQuery();
 
-			int cnt = 0;
+			
 			while (rs.next()) {
-				int tempOrdermenuId = rs.getInt("ordermenu_id");
-				int temp = 0;
-				// 만약에 list안에 해당 ordermenu_id가 있으면 수행
-
-				if (list.size() == 0) {// list 안에 들어간게 없는 경우
-					ArrayList<Integer> tempList = new ArrayList<Integer>();
-					tempList.add(rs.getInt("ordermenu_id")); // ordermenu_id를 삽입
-					// 만약 딸린 옵션이 있으면 옵션도 삽입
-					temp = 0;
-					temp = rs.getInt("orderoption_id");
-					if (temp > 0) {
-						tempList.add(temp);
+				//1. list에 아무것도 없는 경우
+				if(list.size() == 0) {
+					ArrayList<Object> tempList = new ArrayList<Object>();
+					//1-1. menu 정보 넣기
+					MenuDTO menuDTO = new MenuDTO();
+					menuDTO.setMenuId(rs.getInt("menu_id"));
+					menuDTO.setMenuName(rs.getString("menu_name"));
+					menuDTO.setPrice(rs.getInt("menu_price"));
+					tempList.add(menuDTO);
+					int temp = 0;
+					temp = rs.getInt("option_id");
+					if(temp != 0) { //1-2. option이 들어있으면 옵션정보 넣기
+						MenuOptionDTO moDTO = new MenuOptionDTO();
+						moDTO.setId(rs.getInt("option_id"));
+						moDTO.setOptionName(rs.getString("option_name"));
+						moDTO.setPrice(rs.getInt("option_price"));
+						tempList.add(moDTO);
 					}
-					// list에 임시 arraylist를 삽입
-					list.add(tempList);
-				} else { // 아닌경우
-					for (int i = 0; i < list.size(); i++) {
-						// list 안에 해당 ordermenu_id가 있는지 체크
-						ArrayList<Integer> tempList = list.get(i);
-						if (tempList.get(0) == tempOrdermenuId) {
-							// 있으면 옵션이 있을 때 해당 옵션 삽입
-							temp = 0;
-							temp = rs.getInt("orderoption_id");
-							if (temp > 0) {
-								tempList.add(temp);
-
-							}
+				}else { //뭔가 있을 때
+					int i = 0;
+					for(ArrayList<Object> each : list) { //첫번째 들어간 menuDTO의 id와 검사해서 같은게 있는지 비교
+						MenuDTO tempDTO = (MenuDTO)each.get(0);
+						if(tempDTO.getMenuId() == rs.getInt("menu_id")) {
 							break;
 						}
-						if (i == (list.size() - 1)) { // 끝까지 돌았는데 ordermenu_id가 없으면
-							tempList = new ArrayList<Integer>(); // 새로운 arraylist 삽입
-							tempList.add(rs.getInt("ordermenu_id"));
-							// 옵션이 있을 때 해당 옵션 삽입
-							temp = 0;
-							temp = rs.getInt("orderoption_id");
-							if (temp > 0) {
-								tempList.add(temp);
-							}
-							list.add(tempList);
-							break;
+						i++;
+					}
+					if(i >= list.size()) { //같은게 없으면
+						//새로운 menu + option 을 삽입
+						//1. menu 정보 넣기
+						ArrayList<Object> tempList = new ArrayList<Object>();
+						MenuDTO menuDTO = new MenuDTO();
+						menuDTO.setMenuId(rs.getInt("menu_id"));
+						menuDTO.setMenuName(rs.getString("menu_name"));
+						menuDTO.setPrice(rs.getInt("menu_price"));
+						tempList.add(menuDTO);
+						int temp = 0;
+						temp = rs.getInt("option_id");
+						if(temp != 0) { //1-2. option이 들어있으면 옵션정보 넣기
+							MenuOptionDTO moDTO = new MenuOptionDTO();
+							moDTO.setId(rs.getInt("option_id"));
+							moDTO.setOptionName(rs.getString("option_name"));
+							moDTO.setPrice(rs.getInt("option_price"));
+							tempList.add(moDTO);
 						}
+					}else { //같은게 있으면
+						//그 위치의 ArrayList를 가져와서 option만 삽입
+						MenuOptionDTO modto = new MenuOptionDTO();
+						modto.setId(rs.getInt("option_id"));
+						modto.setOptionName(rs.getString("option_name"));
+						modto.setPrice(rs.getInt("option_price"));
+						list.get(i).add(modto);
 					}
 				}
-
-				cnt++;
 			}
 
-			// test
-			for (ArrayList<Integer> a : list) {
-				for (Integer b : a) {
-					System.out.print(b + " ");
-				}
-				System.out.println();
-			}
-
-			if (cnt == 0) {
-				return null;
-			}
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -493,26 +482,19 @@ public class OrderDAO extends JDBConnect {
 			conn = dbConn.getConn();
 			pstmt = conn.prepareStatement(userId);
 			query = new StringBuffer();
-			query.append(" update orderlist as ol1 set ");
-			query.append(" price = ( ");
-			query.append(" select sum1 from(");
-			query.append(" select ifnull(sum(oo.price),0) as sum1 from (");
-			query.append(
-					" select om.id  from orderlist as ol left join ordermenu as om on ol.orderlist_id = om.orderlist_id and (ol.user_id=? and status = '0')"); // 유저아이디
-																																								// 입력
-			query.append(" )as A inner join orderoption as oo on A.id = oo.ordermenu_id");
-			query.append(" )as D");
-			query.append(" )+(");
-			query.append(
-					" select sum2 from (select sum(om.price) as sum2 from orderlist as ol inner join ordermenu as om on ol.orderlist_id = om.orderlist_id) as B");
-			query.append(" )");
-			query.append(" where ol1.orderlist_id  = (");
-			query.append(" select idid from (");
-			query.append(
-					" select distinct ol3.orderlist_id as idid from orderlist as ol3 where user_id = ? and status = 0"); // 유저아이디
-																															// 입력
-			query.append(" ) as C");
-			query.append(" );");
+			
+			query.append(" update orderlist set price = ( ");
+			query.append(" select sum(ifnull(temp2.option_price, 0)) + sum(temp1.menu_price) as sumsum from ( ");
+			query.append(" select omm.menu_price, omm.ordermenu_id, omm.orderlist_id from orderlist as ol inner join ( ");
+			query.append(" select m.price as menu_price, om.id as ordermenu_id, om.orderlist_id from menu as m inner join ordermenu as om on m.menu_id = om.menu_id ");
+			query.append(" ) as omm ");
+			query.append(" on ol.orderlist_id = omm.orderlist_id ");
+			query.append(" where ol.user_id = ? AND ol.status = 0 ");
+			query.append(" ) as temp1 ");
+			query.append(" left join (select oo.ordermenu_id, o.price as option_price from menuoption as o inner join orderoption as oo on oo.option_id = o.id) as temp2 on temp1.ordermenu_id = temp2.ordermenu_id ");
+			query.append(" ) ");
+			query.append(" where user_id = ? AND status = 0; ");
+			
 			pstmt = conn.prepareStatement(query.toString());
 			pstmt.setString(1, userId);
 			pstmt.setString(2, userId);

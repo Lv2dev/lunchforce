@@ -131,62 +131,68 @@ body {
 		<section class="py-5 px-0 mx-0 text-center container">
 			<div class="pt-lg-5 pb-lg-3 px-0 mx-0 text-center">
 				<div class="col-lg-6 col-md-8 mx-auto my-5">
-					<h1 class="m-0 mb-3" style="font-weight: 800;">${ storeDTO.storeName }</h1>
-					<p class="lead text-muted" style="font-weight: 400;">
-						<c:if test="${ storeDTO.status == 0 }">
-						오픈 준비중
-						</c:if>
-						<c:if test="${ storeDTO.status > 0 }">
-						메뉴를 눌러서 장바구니에 추가할 수 있습니다.
-						</c:if>
+					<h1 class="m-0 mb-3" style="font-weight: 800;">${ menuDTO.menuName }</h1>
+					<p class="lead text-muted" style="font-weight: 400;">${ storeName }
 					</p>
 				</div>
 			</div>
 		</section>
 		<div
 			class="px-md-0 px-lg-5 p-0 mx-0 mb-3  row justify-content-center container col-11 col-md-7">
-			
+
 			<div
 				class="col-12 p-0 px-1 m-0 h-50 container row justify-content-center mt-5">
-				<!--  -->
-			<div
-				class="col-12 col-md-12 mb-2 h-100 mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center"
-				onclick="location.href='member/Store?storeId=${item.storeId}'"
-				style="clear: both;">
-				<div class="col-4 col-md-3 m-1 text-center">
-					<img alt="가게이미지" src="${ storeDTO.thumb }">
+				<!-- 메뉴설명 -->
+				<div
+					class="col-12 col-md-12 mb-2 h-100 mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center"
+					style="clear: both;">
+					<div class="col-4 col-md-3 m-1 text-center">
+						<img alt="메뉴이미지" src="${ menuDTO.pic }">
+					</div>
+					<div class="col-6 col-md-7 m-1 text-center">
+						<h5 class="m-0" style="font-weight: 400">${ menuDTO.notice }</h5>
+					</div>
 				</div>
-				<div class="col-6 col-md-7 m-1 text-center" >
-					<h5 class="m-0" style="font-weight: 400;">${ storeDTO.notice }</h5>
-				</div>
+
 			</div>
-				
-				</div>
 			<div
 				class="col-12 p-0 px-1 m-0 container row justify-content-center mt-5">
-				<div
+				<!-- 옵션이 있을 경우에만 수행 -->
+				<c:if test="${ optionListSize > 0 }">
+					<form action="../member/AddShopping"
+						class="col-12 container row justify-content-center form-check m-0 p-0">
+						<div
 							class="col-12 col-md-12 mb-2 container row justify-content-left align-items-center m-0 pl-auto"
-							style="font-weight: 400">
-							<h4>메뉴 목록</h4>
-				</div>
-				<!-- 메뉴목록 -->
-				<c:forEach items="${ menuList }" var="item">
-					<div
-						class="col-12 col-md-12 mb-2 h-75 mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center"
-						onclick="location.href='../member/Menu?menuId=${item.menuId}'"
-						style="clear: both;">
-						<div class="col-4 col-md-3 m-1 text-center">
-							<img alt="메뉴이미지" src="${ item.pic }">
+							style="font-weight: 400;">
+							<h4>옵션 목록</h4>
 						</div>
-						<div class="col-6 col-md-7 m-1 text-center">
-							<h3>${ item.menuName }</h3>
-							<br>
-							<h5>${ item.price }원</h5>
+						<!-- 옵션목록 -->
+						<c:forEach items="${ optionList }" var="item">
+							<div
+								class="col-12 col-md-12 mb-2 h-75 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center m-0 pl-auto text-center"
+								style="font-weight: 700;">
+								<input class="form-check-input m-0 p-0 col-1" type="checkbox" value="${ item.id }" name="option"
+									id="${ item.id }"> <h4 class="col-10 m-0 p-0">${ item.optionName } / ${ item.price }원</h4> 
+							</div>
+						</c:forEach>
+						<div class="col-12 row justify-content-center mt-5 container h-75 text-center">
+							<input type="submit" class="btn btn-primary col-10 h-50" style="font-weight: 700;"
+								value="장바구니에 추가">
 						</div>
-					</div>
-				</c:forEach>
+					</form>
 			</div>
-
+			</c:if>
+			<!-- 옵션이 없으면 -->
+			<c:if test="${ optionListSize == 0 }">
+				<div
+					class="col-12 col-md-12 mb-2 container row justify-content-left align-items-center m-0 pl-auto"
+					style="font-weight: 400">
+					<h4>옵션이 없어요</h4>
+				</div>
+				<div class="col-12 row justify-content-center mt-5 container h-75 text-center">
+							<button type="submit" class="btn btn-primary col-10 h-50" style="font-weight: 700;" onclick="location.href='../member/AddShopping'">장바구니에 추가</button>
+						</div>
+			</c:if>
 		</div>
 	</main>
 
