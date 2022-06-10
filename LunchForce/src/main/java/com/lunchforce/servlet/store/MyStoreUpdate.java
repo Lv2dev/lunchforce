@@ -1,6 +1,7 @@
 package com.lunchforce.servlet.store;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.lunchforce.member.MemberDTO;
+import com.lunchforce.store.StoreDAO;
 import com.lunchforce.store.StoreDTO;
 
 /**
@@ -57,7 +59,7 @@ public class MyStoreUpdate extends HttpServlet {
 			return;
 		}
 
-		// 넘어온 정보들을 체크 및 가져오기
+		// 1. 넘어온 정보들을 체크 및 가져오기
 
 		// 가게명
 		if (request.getParameter("storeName") == null || request.getParameter("storeName") == "") {
@@ -223,8 +225,34 @@ public class MyStoreUpdate extends HttpServlet {
 		int braketimeEnd = Integer.parseInt(hour) * 60 + Integer.parseInt(min); // 총 몇분인지 구함
 		
 		//DTO에 저장
-		StoreDTO tempStoreDTO = new StoreDTO();
-		tempStoreDTO.setStoreName(storeName);
-		tempStoreDTO.set
+		StoreDAO storeDAO = StoreDAO.getInstance();
+		//현재 가게 정보 가져오기
+		StoreDTO tempStoreDTO = null;
+		try {
+			tempStoreDTO = storeDAO.getStoreInfo(storeDTO.getStoreId());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		tempStoreDTO.setStoreName(storeName); //가게명
+		tempStoreDTO.setCategory(category); //카테고리
+		tempStoreDTO.setNotice(notice); //공지사항
+		tempStoreDTO.setTel(tel); //전화번호
+		tempStoreDTO.setThumb(thumb); //가게이미지
+		tempStoreDTO.setOpenTime(openTime); //오픈
+		tempStoreDTO.setCloseTime(closeTime); //폐점
+		tempStoreDTO.setRestDay(restDay); //쉬는날
+		tempStoreDTO.setBraketimeStart(breakeTimeStart); //쉬는시간
+		tempStoreDTO.setBraketimeEnd(braketimeEnd); //쉬는시간끝
+		
+		try { 
+			//2. 가게 정보 업데이트
+			storeDAO.editStoreInfo(tempStoreDTO);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		//가게정보 페이지로 이동
+		response.sendRedirect("../store/MyStore?storeId=" + storeDTO.getStoreId());
+		return;
 	}
 }

@@ -552,7 +552,7 @@ public class StoreDAO extends JDBConnect {
 			pstmt = conn.prepareStatement(query.toString());
 
 			pstmt.setInt(1, category);
-			pstmt.setInt(3, pageCount);
+			pstmt.setInt(3, ((page - 1) * pageCount) + pageCount - 1);
 			pstmt.setInt(2, (page - 1) * pageCount);
 
 			rs = pstmt.executeQuery();
