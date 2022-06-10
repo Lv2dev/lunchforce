@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 public class StoreDTO {
 	private int storeId;
 	private String userId;
-	private String category;
+	private int category;
 	private String notice;
 	private String tel;
 	private String thumb;
@@ -46,10 +46,11 @@ public class StoreDTO {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-	public String getCategory() {
+	
+	public int getCategory() {
 		return category;
 	}
-	public void setCategory(String category) {
+	public void setCategory(int category) {
 		this.category = category;
 	}
 	public String getNotice() {

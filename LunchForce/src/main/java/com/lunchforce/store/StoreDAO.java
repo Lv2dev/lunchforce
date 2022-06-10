@@ -54,7 +54,7 @@ public class StoreDAO extends JDBConnect {
 			Timestamp ts = Timestamp.valueOf(today);
 
 			pstmt.setString(1, storeDTO.getUserId());
-			pstmt.setString(2, storeDTO.getCategory());
+			pstmt.setInt(2, storeDTO.getCategory());
 			pstmt.setString(3, storeDTO.getNotice());
 			pstmt.setString(4, storeDTO.getTel());
 			pstmt.setString(5, storeDTO.getThumb());
@@ -137,7 +137,7 @@ public class StoreDAO extends JDBConnect {
 			while (rs.next()) {
 				storeDTO.setStoreId(storeId);
 				storeDTO.setUserId(rs.getString("user_id"));
-				storeDTO.setCategory(rs.getString("category"));
+				storeDTO.setCategory(rs.getInt("category"));
 				storeDTO.setNotice(rs.getString("notice"));
 				storeDTO.setTel(rs.getString("tel"));
 				storeDTO.setThumb(rs.getString("thumb"));
@@ -149,6 +149,9 @@ public class StoreDAO extends JDBConnect {
 				storeDTO.setJoinDay(rs.getTimestamp("join_day"));
 				storeDTO.setStoreName(rs.getString("store_name"));
 				storeDTO.setStatus(rs.getInt("status"));
+				storeDTO.setAddress(rs.getString("address"));
+				storeDTO.setAddressX(rs.getDouble("address_x"));
+				storeDTO.setAddressY(rs.getDouble("address_y"));
 				cnt++;
 			}
 
@@ -318,8 +321,8 @@ public class StoreDAO extends JDBConnect {
 			disconnectPstmt();
 		}
 	}
-	
-	//전체 검색 결과의 갯수를 리턴하는 메서드
+
+	// 전체 검색 결과의 갯수를 리턴하는 메서드
 	public synchronized int getSearchCount(String keyword) throws SQLException {
 		ArrayList<StoreDTO> list = new ArrayList<StoreDTO>();
 		try {
@@ -328,7 +331,8 @@ public class StoreDAO extends JDBConnect {
 			query.append("select distinct store.store_id, store.store_name, store.thumb ");
 			query.append("from store left join menu ");
 			query.append("on store.store_id = menu.store_id and ");
-			query.append("(store.store_name like '%" + keyword + "%' or menu.menu_name like '%" + keyword + "%') order by store_name");
+			query.append("(store.store_name like '%" + keyword + "%' or menu.menu_name like '%" + keyword
+					+ "%') order by store_name");
 
 			pstmt = conn.prepareStatement(query.toString());
 
@@ -354,20 +358,21 @@ public class StoreDAO extends JDBConnect {
 		ArrayList<StoreDTO> list = new ArrayList<StoreDTO>();
 		try {
 			conn = dbConn.getConn();
-			
+
 			query = new StringBuffer();
 			query.append("select * from ( ");
-			query.append("select distinct st.store_id, st.store_name, st.thumb, row_number() over(order by store_name) as num ");
+			query.append(
+					"select distinct st.store_id, st.store_name, st.thumb, row_number() over(order by store_name) as num ");
 			query.append("from store as st left join menu as m  ");
-			query.append("on st.store_id = m.store_id and ");
-			query.append("(st.store_name like '%"+keyword+"%' or m.menu_name like '%"+keyword+"%') group by st.store_id order by store_name limit ? ) as temp ");
+			query.append("on st.store_id = m.store_id where ");
+			query.append("(st.store_name like '%" + keyword + "%' or m.menu_name like '%" + keyword
+					+ "%') group by st.store_id order by store_name limit ? ) as temp ");
 			query.append("where num > ? order by num ");
 
 			pstmt = conn.prepareStatement(query.toString());
-			
+
 			pstmt.setInt(1, pageCount);
 			pstmt.setInt(2, (page - 1) * pageCount);
-			
 
 			rs = pstmt.executeQuery();
 			int cnt = 0;
@@ -526,6 +531,111 @@ public class StoreDAO extends JDBConnect {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
 			System.out.println("가게닫기에러");
+		} finally {
+			disconnectPstmt();
+		}
+	}
+
+	// 카테고리별로 가져오기
+	public synchronized ArrayList<StoreDTO> searchCategoryStorePaging(int category, int page, int pageCount)
+			throws SQLException {
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+
+			query.append("select * from ( ");
+			query.append("   select store_id, store_name, thumb, row_number() over(order by store_name) as num ");
+			query.append("   from store ");
+			query.append("   where category & ? = 1"); // 비트연산
+			query.append(") as temp where num between ? and ?");
+
+			pstmt = conn.prepareStatement(query.toString());
+
+			pstmt.setInt(1, category);
+			pstmt.setInt(3, pageCount);
+			pstmt.setInt(2, (page - 1) * pageCount);
+
+			rs = pstmt.executeQuery();
+
+			ArrayList<StoreDTO> list = new ArrayList<StoreDTO>();
+			while (rs.next()) {
+				StoreDTO dto = new StoreDTO();
+				dto.setStoreId(rs.getInt("store_id"));
+				dto.setStoreName(rs.getString("store_name"));
+				dto.setThumb(rs.getString("thumb"));
+				list.add(dto);
+			}
+
+			return list;
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.out.println("카테고리별로 가게 가져오기 오류 " + e.getMessage());
+			return null;
+		} finally {
+			disconnectPstmt();
+		}
+	}
+
+	// 카테고리별 검색 갯수 가져오기
+	public synchronized int searchCategoryStoreCount(int category) throws SQLException {
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+
+			query.append("   select count(store_id) as cnt ");
+			query.append("   from store ");
+			query.append("   where category & ? = 1"); // 비트연산
+
+			pstmt = conn.prepareStatement(query.toString());
+
+			pstmt.setInt(1, category);
+
+			rs = pstmt.executeQuery();
+
+			int cnt = 0;
+			while (rs.next()) {
+				cnt = rs.getInt("cnt");
+			}
+
+			return cnt;
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.out.println("카테고리별 가게 갯수 가져오기 오류 " + e.getMessage());
+			return 0;
+		} finally {
+			disconnectPstmt();
+		}
+	}
+	
+	public synchronized ArrayList<StoreDTO> getMyStoreList(String memberId) throws SQLException{
+		try {
+			conn = dbConn.getConn();
+			query = new StringBuffer();
+			query.append("select * from store where user_id = ?");
+			
+			pstmt = conn.prepareStatement(query.toString());
+			pstmt.setString(1, memberId);
+			rs = pstmt.executeQuery();
+			
+			ArrayList<StoreDTO> list = new ArrayList<StoreDTO>();
+			while(rs.next()) {
+				StoreDTO storeDTO = new StoreDTO();
+				storeDTO.setStoreName(rs.getString("store_name"));
+				storeDTO.setStoreId(rs.getInt("store_id"));
+				storeDTO.setUserId(rs.getString("user_id"));
+				storeDTO.setThumb(rs.getString("thumb"));
+				list.add(storeDTO);
+			}
+			
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("가게 정보 list로 가져오기 오류 " + e.getMessage());
+			return null;
 		} finally {
 			disconnectPstmt();
 		}

@@ -8,7 +8,7 @@ request.setCharacterEncoding("UTF-8");
 <html>
 <head>
 <meta charset="UTF-8">
-<title>예약은 김예약</title>
+<title>점심특공대</title>
 <!-- bootstrap -->
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
@@ -106,7 +106,7 @@ body {
 						<li class="nav-item"><a class="nav-link active"
 							aria-current="page" href="#">리뷰관리</a></li>
 						<li class="nav-item"><a class="nav-link active"
-							aria-current="page" href="#">점특추천</a></li>
+							aria-current="page" href="../member/Recommend">점특추천</a></li>
 						<li class="nav-item"><a class="nav-link active"
 							aria-current="page" href="../member/MyAddress">주소관리</a></li>
 						<c:if test="${login == 0 }">
@@ -145,59 +145,157 @@ body {
 		</section>
 		<div
 			class="px-md-0 px-lg-5 p-0 mx-0 mb-3  row justify-content-center container col-11 col-md-7">
-			
+
 			<div
-				class="col-12 p-0 px-1 m-0 h-50 container row justify-content-center mt-5">
-				<!--  -->
+				class="col-12 p-0 px-1 m-0 container row justify-content-center">
+				<!-- 가게이미지 -->
 				<div
-					class="col-12 col-md-12 mb-2 py-1 h-100 mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center"
+					class="col-12 col-md-12 mb-2 py-1 mx-2 container row justify-content-center align-items-center"
 					style="clear: both;">
-					<div class="col-4 col-md-3 m-1 text-center">
+					<div
+						class="col-4 col-md-3 m-1 text-center shadow-lg rounded-lg bg-body ">
 						<img alt="가게이미지" src="${ storeDTO.thumb }">
 					</div>
-					<div
-						class="col-6 col-md-7 m-1 text-left container row justify-content-left ">
-						<h5 class="m-0 col-12 text-left" style="font-weight: 400;">${ storeDTO.notice }</h5>
-						<div class="col-12 container row justify-content-right  pt-4 ">
-							<div class="col-4">
-								<input type="button" class="btn btn-primary "
-									style="font-weight: 700;" value="정보보기"
-									onclick="location.href='../member/StoreInfo'">
-							</div>
-						</div>
-
-					</div>
-
 				</div>
 			</div>
 			<div
 				class="col-12 p-0 px-1 m-0 container row justify-content-center mt-5">
 				<div
-							class="col-12 col-md-12 mb-2 container row justify-content-left align-items-center m-0 pl-auto"
-							style="font-weight: 400">
-							<h4>메뉴 목록</h4>
+					class="col-12 col-md-12 mb-2 container row justify-content-left align-items-center m-0 pl-auto"
+					style="font-weight: 400">
+					<h4>상세 정보</h4>
 				</div>
-				<!-- 메뉴목록 -->
-				<c:forEach items="${ menuList }" var="item">
-					<div
-						class="col-12 col-md-12 mb-2 h-75 mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center"
-						onclick="location.href='../member/Menu?menuId=${item.menuId}'"
-						style="clear: both;">
-						<div class="col-4 col-md-3 m-1 text-center">
-							<img alt="메뉴이미지" src="${ item.pic }">
-						</div>
-						<div class="col-6 col-md-7 m-1 text-center">
-							<h3>${ item.menuName }</h3>
-							<br>
-							<h5>${ item.price }원</h5>
-						</div>
-					</div>
-				</c:forEach>
 			</div>
-
+			<!-- 상세정보들 -->
+			<div
+				class="col-12 col-md-12 mb-2  mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center mt-5 py-3"
+				style="clear: both;">
+				<div class="col-11 col-md-10 m-1 text-left">
+					<h3>공지사항</h3>
+					<br>
+					<h5>${ storeDTO.notice }</h5>
+				</div>
+			</div>
+			<!-- 24시간 영업이 아닌 경우 -->
+			<c:if test="${ openTimeChk == 0 }">
+			<div
+				class="col-12 col-md-12 mb-2  mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center py-3"
+				style="clear: both;">
+				<div
+					class="col-12 p-0 px-1 m-0 container row justify-content-center ">
+					<div class="col-11 col-md-10 m-1 text-left">
+						<h3>영업시간</h3>
+						<br>
+						<h5>${ openTime }~${ closeTime }</h5>
+					</div>
+				</div>
+				</div>
+			</c:if>
+			<!-- 24시간 영업인 경우 -->
+			<c:if test="${ openTimeChk == 1 }">
+			<div
+				class="col-12 col-md-12 mb-2  mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center py-3"
+				style="clear: both;">
+				<div
+					class="col-12 p-0 px-1 m-0 container row justify-content-center ">
+					<div class="col-11 col-md-10 m-1 text-left">
+						<h3>영업시간</h3>
+						<br>
+						<h5>24시간 영업</h5>
+					</div>
+				</div>
+				</div>
+			</c:if>
+			<!-- 휴무 시간이 있는 경우 -->
+			<c:if test="${ breakTimeChk == 0 }">
+			<div
+				class="col-12 col-md-12 mb-2  mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center py-3"
+				style="clear: both;">
+				<div
+					class="col-12 p-0 px-1 m-0 container row justify-content-center ">
+					<div class="col-11 col-md-10 m-1 text-left">
+						<h3>휴무시간</h3>
+						<br>
+						<h5>${ breakTimeStart }~${ breakTimeEnd }</h5>
+					</div>
+				</div>
+				</div>
+			</c:if>
+			<!-- 쉬는 요일 -->
+			<c:if test="${ not empty restDay }">
+			<div
+				class="col-12 col-md-12 mb-2  mx-2 container row justify-content-center shadow-lg rounded-lg bg-body align-items-center py-3"
+				style="clear: both;">
+				<div
+					class="col-12 p-0 px-1 m-0 container row justify-content-center">
+					<div class="col-11 col-md-10 m-1 text-left">
+						<h3>휴일</h3>
+						<br>
+						<h5>${ restDay }</h5>
+					</div>
+				</div>
+				</div>
+			</c:if>
+			<section class="py-5 px-0 mx-0 text-center container">
+			<div class="pt-lg-5 pb-lg-3 px-0 mx-0 text-center">
+				<div class="col-lg-6 col-md-8 mx-auto my-5">
+					<h1 class="m-0 mb-3" style="font-weight: 800;">찾아오시는 길</h1>
+					<p class="lead text-muted" style="font-weight: 400;">
+						<!-- 담긴 주소가 없을 때 -->
+						<c:if test="${ addressChk == 0 }">
+						주소가 입력되어 있지 않은 가게입니다.
+						</c:if>
+						<!-- 담긴 주소가 있을 때 -->
+						<c:if test="${ addressChk == 1 }">
+						${ addressDTO.address }
+						</c:if>
+					</p>
+				</div>
+			</div>
+		</section>
+		<!-- 지도가 표시되는 곳 -->
+		<c:if test="${ addressChk == 1 }">
+			<div
+				class="box px-md-0 px-lg-5 p-0 mx-0 mb-3  row justify-content-center container col-10 col-md-8"
+				id="map"></div>
+		</c:if>
 		</div>
 	</main>
 
+<c:if test="${ addressChk == 1 }">
+	<script
+		src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	<script
+		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=60fe788f0ea06f351b62582019d41e56&libraries=services"></script>
+	<script>
+var x, y, address;
+var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+    mapOption = {
+        center: new daum.maps.LatLng(37.537187, 127.005476), // 지도의 중심좌표
+        level: 5 // 지도의 확대 레벨
+    };
 
+//지도를 미리 생성
+var map = new daum.maps.Map(mapContainer, mapOption);
+//주소-좌표 변환 객체를 생성
+var geocoder = new daum.maps.services.Geocoder();
+//마커를 미리 생성
+var marker = new daum.maps.Marker({
+    position: new daum.maps.LatLng(37.537187, 127.005476),
+    map: map
+});
+
+
+//해당 주소에 대한 좌표를 받아서
+var coords = new daum.maps.LatLng(${addressDTO.addressY}, ${addressDTO.addressX});
+// 지도를 보여준다.
+mapContainer.style.display = "block";
+map.relayout();
+// 지도 중심을 변경한다.
+map.setCenter(coords);
+// 마커를 결과값으로 받은 위치로 옮긴다.
+marker.setPosition(coords);
+</script>
+</c:if>
 </body>
 </html>

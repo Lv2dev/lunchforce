@@ -131,49 +131,46 @@ body {
 		<section class="py-5 px-0 mx-0 text-center container">
 			<div class="pt-lg-5 pb-lg-3 px-0 mx-0 text-center">
 				<div class="col-lg-6 col-md-8 mx-auto my-auto">
-					<h1 class="fw-light">주문내역</h1>
-					<p class="lead text-muted">Orders</p>
+					<h1 class="fw-light">카테고리</h1>
+					<p class="lead text-muted">"${ categoryStr }"</p>
 				</div>
 			</div>
 		</section>
-		
+		<div class=" pb-5 mb-5 row justify-content-center col-lg-8 col-md-12">
+			<form class="row justify-content-center container col-12" action="../member/CategorySearchProc?category=${category }">
+				<div class="col-8">
+					<input type="search" class="form-control h-3" style="height: 100%;"
+						placeholder="검색어 입력" aria-label="Search" name="keyword">
+				</div>
+				<div class="col-4">
+					<button class="w-100 btn btn-lg btn-outline-primary"
+						style="height: 100%;" type="submit">검색</button>
+				</div>
+			</form>
+		</div>
 		<div
 			class="px-md-0 px-lg-5 mt-5 mb-3 row justify-content-center container col-12">
-			<c:forEach items="${ orderList }" var="item">
-				<div class="col-10 col-md-10 mx-1 mb-2 container row justify-content-center shadow-lg rounded bg-body align-items-center" style="height:100%;"
-				onclick="location.href='../member/DetailOrder?orderlistId=${item.orderlistId}'">
-				<div  class="col-12 row justify-content-left">
-				주문일시 : ${ item.orderDate } <br>
-				상태 :
-				<c:if test="${ item.status == 1 }">
-					수락대기중
-				</c:if>
-				<c:if test="${ item.status == 2 }">
-					주문수락<br>소요시간 : ${ item.time } 분
-				</c:if>
-				<c:if test="${ item.status == 3 }">
-					완료된 주문
-				</c:if>
-				<br>
-				총액 : ${item.price }<br>
-				가게명 : ${item.storeName }
-				</div>
+			<c:forEach items="${ searchList }" var="item">
+				<div class="col-10 col-md-10 mx-1 mb-2 container row justify-content-center shadow-lg rounded bg-body align-items-center"
+				 onclick="location.href='../member/Store?storeId=${item.storeId}'">
+				<img alt="가게이미지" src="${ item.thumb }" class="col-10 col-md-3">
+				<b class="col-7">${item.storeName }</b>
 				</div>
 			</c:forEach>
 			<div class="col-12 col-md-7 mx-5 my-5 container row justify-content-center shadow-lg rounded bg-body">
-				<c:if test="${page > 10}">
-					<div class="col-1"><a href="../member/Order?page=${ page - 10 }">이전</a></div>
+				<c:if test="${ page > pageCount }">
+					<div class="col-1"><a href="../member/CategorySearch?page=${ start - 1 }&category=${category}">이전</a></div>
 				</c:if>
 				<c:forEach var="i" begin ="${ start }" end="${ end }" step="1">
 				<c:if test="${ i == page }">
 					<div class="col-1"><b>${ page }</b></div>
 				</c:if>
 				<c:if test="${ i != page }">
-					<div class="col-1"><a href="../member/Order?page=${ i }">${ i }</a></div>
+					<div class="col-1"><a href="../member/CategorySearch?page=${ i }&category=${category}">${ i }</a></div>
 				</c:if>
 				</c:forEach>
-				<c:if test="${ page < 10 && pages > 10 }">
-					<div class="col-1"><a href="../member/Order?page=${ end + 1 }">다음</a></div>
+				<c:if test="${ end < pages }">
+					<div class="col-1"><a href="../member/CategorySearch?page=${ end + 1 }&category=${category}">다음</a></div>
 				</c:if>
 			</div>
 		</div>

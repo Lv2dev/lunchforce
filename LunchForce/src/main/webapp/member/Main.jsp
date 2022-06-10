@@ -151,34 +151,34 @@ body {
 		<div
 			class="px-md-0 px-lg-5 mt-5 mb-3 row justify-content-center container col-12">
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">한식</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=1'">한식</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">중식</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=2'">중식</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">일식</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=4'">일식</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">양식</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=8'">양식</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">패스트푸드</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=16'">패스트푸드</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">치킨</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=32'">치킨</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">피자</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=64'">피자</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">아시안</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=128'">아시안</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">카페/디저트</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=256'">카페/디저트</button>
 			</div>
 			<div class="box px-0 col-5 col-md-2 mx-1 mb-2">
-				<button class="btn btn-lg btn-secondary content" type="button">분식</button>
+				<button class="btn btn-lg btn-secondary content" type="button" onclick="location.href='../member/CategorySearch?category=512'">분식</button>
 			</div>
 
 		</div>
